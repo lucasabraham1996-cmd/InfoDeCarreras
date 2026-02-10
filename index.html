@@ -1,629 +1,971 @@
-import React, { useState } from 'react';
-import { 
-  BookOpen, Users, Briefcase, Clock, Award, 
-  ChevronRight, X, Info, ArrowLeft, Calendar, 
-  CheckCircle2, HelpCircle, MapPin, GraduationCap, Building2, FileText, ExternalLink, Gavel, Download, Code, AlertTriangle, Lightbulb 
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Institución Cervantes - Oferta Académica</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Dependencias para Recharts -->
+    <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-// --- DATA ---
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-// Colores definidos
-const COLORS = {
-  ASC: "#00b1e1",
-  RH: "#b388c2",
-  HYS: "#f4c01e",
-  AE: "#8da248",
-  MKT: "#fa5d0f",
-  DW: "#a8927d",
-  GI: "#bb242a",
-  IA: "#2d4693"
-};
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        // Recuperamos Recharts del objeto global con un fallback seguro
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = window.Recharts || {};
 
-const CARRERAS = [
-  {
-    id: 1,
-    code: "ASC",
-    nombre: "Analista de Sistemas",
-    area: "Informática",
-    color: COLORS.ASC,
-    duracion: "3 Años",
-    modalidad_corta: "Presencial / Semi",
-    descripcion: "Desarrollo, diseño e implementación de proyectos de sistemas informáticos.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=7",
-    perfil_profesional: "El Analista de Sistemas es un profesional especializado en el desarrollo, diseño e implementación de proyectos de sistemas informáticos. A partir del diagnóstico de los problemas y necesidades de información de las organizaciones, está capacitado para interpretar requerimientos empresariales y crear soluciones de software, aplicando sus conocimientos en tecnologías de la información, gestión de proyectos y calidad de software.",
-    detalle: {
-      propuesta_valor: [
-        "Salida laboral asegurada: Miles de puestos sin cubrir en Córdoba y el país.",
-        "Continuidad universitaria: Articulación con UTN y Universidad de Palermo.",
-        "Formación Práctica: Plan de prácticas formativas en organizaciones reales (Nodo Edutech, Cluster Tecnológico Córdoba).",
-        "Matrícula profesional gratuita en CPCIPC.",
-        "Formación integral: Incluye gestión de proyectos y calidad de software (diferencial único).",
-        "Trayectoria: Primera carrera dictada desde los 90s."
-      ],
-      horarios: "A partir de las 18:00 hs (Turno Noche).",
-      modalidades: [
-        { tipo: "Presencial", desc: "Cursado de 4 días a la semana (variable)." },
-        { tipo: "Semi-Presencial", desc: "Cursado de un solo día (miércoles) + tutorías y apoyo virtual." }
-      ],
-      requisitos: [
-        "Título Secundario completo (o constancia de título en trámite).",
-        "Fotocopia de DNI.",
-        "Partida de Nacimiento.",
-        "Abonar matrícula de inscripción."
-      ],
-      faqs: [
-        { q: "¿Es necesario tener conocimientos previos?", a: "Absolutamente no. La carrera empieza de cero." },
-        { q: "¿Qué lenguajes y tecnologías se ven?", a: "HTML5, CSS3, JavaScript, JQuery, AJAX, JSON, XML. Enfoque en metodologías ágiles (Scrum)." },
-        { q: "¿Cuál es el rol del egresado?", a: "Diagnosticar problemas, diseñar nuevos sistemas, programar, probar e implementar soluciones informáticas." }
-      ]
-    }
-  },
-  {
-    id: 2,
-    code: "RH",
-    nombre: "Recursos Humanos",
-    area: "Empresarial",
-    color: COLORS.RH,
-    duracion: "3 Años",
-    modalidad_corta: "Presencial / Semi / Dist.",
-    descripcion: "Gestión integral del activo humano, clima laboral y conducción de equipos.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=5",
-    perfil_profesional: "El Técnico Superior en Recursos Humanos es un profesional especializado en gestionar el activo humano de una organización y conducirlo hacia las metas institucionales. El egresado está capacitado para seleccionar y evaluar personal, diseñar puestos, formar equipos de trabajo, llevar la administración de personal, organizar la distribución de tareas, diseñar estrategias de capacitación y propiciar la mejora del ambiente laboral.",
-    detalle: {
-        propuesta_valor: [
-          "Título Intermedio: 'Analista de Recursos Humanos' que permite una rápida inserción laboral.",
-          "Doble Enfoque Profesional: Formación para trabajar dentro de una empresa (Staff) o como Consultor Externo.",
-          "Prácticas Reales: Diseño de planes de capacitación, presupuestos y selección de personal.",
-          "Cercanía Docente: Profesores que comparten su experiencia y testimonio directo del campo.",
-          "Vinculación Profesional: Acceso a la Asociación de Profesionales de RRHH para networking y eventos.",
-          "Articulación Universitaria: Continuidad directa para la Licenciatura en Recursos Humanos."
-        ],
-        horarios: "Turno Noche (Ideal para quienes trabajan).",
-        modalidades: [
-          { tipo: "Presencial", desc: "Clases en aula con interacción directa." }, 
-          { tipo: "Semi-Presencial", desc: "Cursado reducido con apoyo virtual." },
-          { tipo: "Distancia", desc: "Estudio flexible 100% online con soporte virtual." }
-        ],
-        requisitos: [
-          "Título Secundario completo.",
-          "Fotocopia de DNI.",
-          "Partida de Nacimiento.",
-          "Matrícula de inscripción."
-        ],
-        faqs: [
-          { q: "¿Qué salida laboral tiene?", a: "Muy amplia. Podés trabajar en selección, capacitación, administración de personal, sueldos, o como asesor externo independiente." },
-          { q: "¿Existe un colegio profesional?", a: "Se está en camino a constituirlo. Actualmente existe una Asociación de Profesionales muy activa que regula y vincula a los egresados." },
-          { q: "¿Qué diferencia hay con un Licenciado?", a: "El Técnico tiene un perfil muy práctico y operativo. Las funciones son similares, variando a veces el nivel de responsabilidad gerencial." },
-          { q: "¿Qué materias prácticas tiene?", a: "Selección de Personal, Diseño de Puestos, Capacitación, Liquidación de Sueldos y Seguridad e Higiene." }
-        ]
-    }
-  },
-  {
-    id: 3,
-    code: "HYS",
-    nombre: "Higiene y Seguridad",
-    area: "Industria y Ambiente",
-    color: COLORS.HYS,
-    duracion: "3 Años",
-    modalidad_corta: "Presencial / Semi",
-    descripcion: "Prevención de riesgos laborales y creación de ambientes de trabajo seguros.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=19",
-    perfil_profesional: "El profesional de la seguridad desempeña funciones de asesor, instructor, investigador, analizador y ejecutor interno para lograr un control óptimo y la reducción de los peligros que causen daños a personas o propiedad. Su misión es proteger la vida, preservar la integridad psicofísica de los trabajadores y prevenir accidentes o enfermedades derivadas de la actividad laboral.",
-    detalle: {
-        propuesta_valor: [
-            "Trabajo de Campo desde el 1er Cuatrimestre: Visitas a empresas como Coca Cola, Holcim, Arcor, entre otras.",
-            "Matrícula Profesional: Título habilitante para matricularse en COPHISEC.",
-            "Amplia Salida Laboral: Industria, construcción, agro (interior), minería y petróleo (país).",
-            "Continuidad Universitaria: Articulación con UTN (presencial) y Univ. FASTA (distancia).",
-            "Red de Vinculaciones: Contacto directo con Ministerio de Trabajo, ARTs, sindicatos y empresas de medicina laboral.",
-            "Capacitación Continua: Jornada Anual de Higiene y Seguridad (desde 2009) y talleres constantes."
-        ],
-        horarios: "A partir de las 18:00 hs.",
-        modalidades: [
-            { tipo: "Presencial", desc: "4 días de cursado (variable)." },
-            { tipo: "Semi-Presencial", desc: "Un solo día de cursado presencial + tutorías y apoyo virtual." }
-        ],
-        requisitos: [
-            "Secundario completo.",
-            "Fotocopia de DNI.",
-            "Apto psicofísico (Recomendado por la naturaleza de la profesión).",
-            "Matrícula de inscripción."
-        ],
-        faqs: [
-            { q: "¿Se puede ejercer en otras provincias?", a: "Sí, sin inconvenientes. El título es oficial y se valida en colegios profesionales de otras jurisdicciones." },
-            { q: "¿Puedo firmar informes y planes?", a: "Sí, el técnico es un profesional habilitado para relevamientos, informes, capacitación y gestión de riesgos." },
-            { q: "¿Cuál es el rol principal?", a: "Asesorar, instruir, investigar accidentes y ejecutar planes para reducir peligros y proteger la vida de los trabajadores." }
-        ]
-    }
-  },
-  {
-    id: 4,
-    code: "AE",
-    nombre: "Administración de Empresas",
-    area: "Empresarial",
-    color: COLORS.AE,
-    duracion: "3 Años",
-    modalidad_corta: "Presencial / Semi",
-    descripcion: "Visión global de los negocios, gestión estratégica y optimización de organizaciones.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=2",
-    perfil_profesional: "El Técnico Superior en Administración de Empresas está capacitado para planificar, organizar, dirigir y controlar las actividades de las distintas áreas de una organización (comercial, financiera, RRHH, producción). Su formación le permite desempeñarse en PyMEs, grandes empresas, organismos públicos o ONGs, asistiendo en la toma de decisiones estratégicas y operativas, o gestionando su propio emprendimiento.",
-    detalle: {
-         propuesta_valor: [
-             "Plan de Estudios Actualizado: Contenidos modernos que integran sistemas CRM e Inteligencia Artificial.",
-             "Versatilidad Profesional: Formación integral para desempeñarse en cualquier área de una organización.",
-             "Enfoque en PyMEs: Preparación específica para gestionar el sector más relevante de la economía nacional.",
-             "Consultoría Externa: Habilitación para trabajar de forma independiente asesorando empresas.",
-             "Modalidad Semipresencial: Flexibilidad ideal para quienes trabajan o tienen familia.",
-             "Formación Ética: Énfasis en buenas prácticas, comportamiento social y sustentabilidad."
-         ],
-         horarios: "Consultar según modalidad.",
-         modalidades: [
-             { tipo: "Presencial", desc: "Cursado regular para quienes buscan la experiencia completa del aula." },
-             { tipo: "Semi-Presencial", desc: "Ideal para quienes trabajan. Cursado reducido con apoyo virtual." }
-         ],
-         requisitos: ["Secundario completo.", "DNI.", "Partida de Nacimiento.", "Matrícula."],
-         faqs: [
-             { q: "¿Cuál es la diferencia entre un 'Administrador' y un 'Gestor'?", a: "El Administrador tiene una visión estratégica y organizacional completa (planifica y dirige), mientras que el gestor suele enfocarse en tareas más operativas." },
-             { q: "¿Tiene salida laboral rápida?", a: "Sí, es una de las profesiones que nunca pasa de moda. El rol del administrador es fundamental e irremplazable en cualquier organización." },
-             { q: "¿Puedo trabajar por mi cuenta?", a: "Sí, el título te habilita para ejercer la consultoría externa, realizando diagnósticos y planes de mejora para otras empresas." }
-         ]
-    }
-  },
-  {
-    id: 5,
-    code: "MKT",
-    nombre: "Marketing",
-    area: "Empresarial",
-    color: COLORS.MKT,
-    duracion: "3 Años",
-    modalidad_corta: "Semi / Distancia",
-    descripcion: "Estrategias integrales de comercialización, marketing digital y gestión de negocios.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=3",
-    perfil_profesional: "El Técnico Superior en Marketing es un profesional especializado en organizar, programar, coordinar y controlar las operaciones comerciales de una organización. Estudia el comportamiento de los mercados, competidores y consumidores para diseñar estrategias que permitan atraer, captar y fidelizar clientes. Su formación combina el marketing tradicional con herramientas digitales y de comercio electrónico.",
-    detalle: {
-        propuesta_valor: [
-            "Formación 360°: Combinación de marketing convencional, marketing digital y nuevos esquemas de comercio electrónico.",
-            "Versatilidad Profesional: Capacidad para desarrollar una amplia gama de funciones en departamentos comerciales y de marketing.",
-            "Plan de Estudios Dinámico: Contenidos actualizados y flexibles que responden a las necesidades reales del mercado.",
-            "Consultoría Externa: Habilitación para asesorar a empresas en sus planes comerciales de forma independiente.",
-            "Enfoque Ético y Sustentable: Formación en buenas prácticas y responsabilidad social empresarial.",
-            "Proyecto de Prácticas: Desarrollo de proyectos propios y emprendedurismo desde el 4to cuatrimestre."
-        ],
-        horarios: "Consultar según modalidad.",
-        modalidades: [
-            { tipo: "Semi-Presencial", desc: "Cursado presencial reducido complementado con tutorías virtuales." },
-            { tipo: "Distancia Total", desc: "Educación 100% online para quienes necesitan máxima flexibilidad." }
-        ],
-        requisitos: ["Secundario completo.", "DNI.", "Partida de Nacimiento.", "Matrícula."],
-        faqs: [
-            { q: "¿Es solo Marketing Digital?", a: "No. La carrera abarca mucho más. Se enseña estrategia comercial integral, investigación de mercado, desarrollo de productos y precios, además de herramientas digitales." },
-            { q: "¿Salgo siendo Community Manager?", a: "Nuestra propuesta es superior. Un Técnico en Marketing gestiona la estrategia completa, donde las redes sociales son solo un canal más de comunicación." },
-            { q: "¿Qué salida laboral tiene?", a: "Muy amplia: Departamentos de Marketing, Agencias de Publicidad, Consultoría, Ventas, Investigación de Mercado y Emprendimientos propios." }
-        ],
-        tips_asesor: {
-            evitar: ["Community Manager (somos más que eso)", "Solo Marketing Digital", "Marketing de Redes Sociales (es solo una parte)"],
-            argumentos: ["Formación 360°", "Estrategia Comercial Integral", "Gestión de Negocios", "Perfil Versátil"]
-        }
-    }
-  },
-  {
-    id: 6,
-    code: "DW",
-    nombre: "Desarrollo Web",
-    area: "Informática",
-    color: COLORS.DW,
-    duracion: "2.5 Años",
-    modalidad_corta: "Semi-Presencial",
-    descripcion: "Desarrollo de sitios web estáticos, dinámicos y aplicaciones para dispositivos móviles.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=15",
-    perfil_profesional: "El Técnico Superior en Desarrollo Web y Aplicaciones Digitales es un profesional capacitado para desarrollar proyectos de sitios web (estáticos y dinámicos) y aplicaciones móviles para celulares y tablets. Domina tecnologías de Front-End y Back-End (Full Stack), bases de datos, metodologías ágiles y ciberseguridad. Puede trabajar en equipos interdisciplinarios o de manera autónoma (freelance) en un mercado global de alta demanda.",
-    detalle: {
-        propuesta_valor: [
-            "Alta Empleabilidad: Perfil IT con miles de puestos vacantes en el sector tecnológico nacional e internacional.",
-            "Formación Full Stack: Aprendizaje integral de Front End (HTML, CSS, JS), Back End y desarrollo de Apps Móviles.",
-            "Certificaciones Intermedias: Obtención de certificados en tecnologías específicas (JavaScript, Angular, C#, Bases de Datos) a lo largo del cursado.",
-            "Metodologías Ágiles: Trabajo con Scrum y prácticas modernas de ingeniería de software simulando entornos reales.",
-            "Sin Conocimientos Previos Excluyentes: Incluye capacitaciones de nivelación en técnicas de estudio e introducción a la programación.",
-            "Networking Estratégico: Vinculación con el Cluster Tecnológico Córdoba y participación en eventos clave como la Semana T.I.C."
-        ],
-        horarios: "Martes de 18:00 a 23:00 hs.",
-        modalidades: [{ 
-            tipo: "Semi-Presencial", 
-            desc: "Un día de cursado semanal (Martes) + apoyo en tutorías semanales." 
-        }],
-        requisitos: [
-            "Título Secundario completo.",
-            "Computadora personal básica.",
-            "Ganas de aprender (no requiere conocimientos previos de programación)."
-        ],
-        faqs: [
-            { q: "¿Necesito saber programar antes?", a: "Absolutamente no. La carrera empieza de cero e incluye cursos de nivelación." },
-            { q: "¿Qué tecnologías voy a aprender?", a: "HTML5, CSS3, JavaScript, JQuery, Angular, C#, SQL, Visual Studio, metodologías ágiles, seguridad web y testing." },
-            { q: "¿Cuál es la salida laboral?", a: "Desarrollador Web, Programador Full Stack, Desarrollador de Apps Móviles, QA/Tester, Consultor Tecnológico. Alta demanda en empresas y startups." },
-            { q: "¿Incluye prácticas?", a: "Sí, incluye prácticas profesionalizantes en empresas del sector tecnológico para ganar experiencia real." }
-        ]
-    }
-  },
-  {
-    id: 7,
-    code: "GI",
-    nombre: "Gestión Inmobiliaria",
-    area: "Jurídica",
-    color: COLORS.GI,
-    duracion: "2.5 Años",
-    modalidad_corta: "Presencial / Semi / Dist.",
-    descripcion: "Formación dual en Negocios Inmobiliarios y Martillero Público.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=18",
-    perfil_profesional: "El egresado posee un doble perfil: Gestor Inmobiliario y Martillero. Como Gestor, administra, tasa y comercializa propiedades, gestionando consorcios y asesorando legalmente. Como Martillero, está habilitado para realizar subastas judiciales y privadas de todo tipo de bienes (inmuebles, automotores, hacienda, obras de arte), actuando como auxiliar de la justicia en remates judiciales.",
-    detalle: {
-        propuesta_valor: [
-            "Doble Perfil Profesional: Formación integral en 'Perfil Inmobiliario' (gestión y venta) y 'Perfil Martillero' (tasación y subastas).",
-            "Institución N°1 en Vinculaciones: Convenios activos con ambos colegios profesionales (Corredores y Martilleros).",
-            "Prácticas Profesionalizantes únicas: 3 niveles para construir un proyecto inmobiliario real desde sus cimientos (plan, diseño, marca, visión).",
-            "Experiencia Real en Subastas: Simulación de 'Subasta Experimental' en vivo como cierre de la formación.",
-            "Formación Jurídica Sólida: Estudio profundo de contratos, derechos reales, fideicomisos y normativas vigentes.",
-            "Habilitación Total: Título necesario para matricularse y ejercer legalmente la profesión."
-        ],
-        horarios: "Mixtos (Presencial / Virtual).",
-        modalidades: [
-            { tipo: "Presencial", desc: "Cursado regular en nuestras sedes." },
-            { tipo: "Semi-Presencial", desc: "Combinación de clases presenciales y soporte virtual con plataforma MS-Teams." },
-            { tipo: "Distancia", desc: "Cursado 100% online a través de plataforma." }
-        ],
-        requisitos: [
-            "Título Secundario completo.",
-            "Fotocopia de DNI.",
-            "Partida de Nacimiento.",
-            "Matrícula de inscripción."
-        ],
-        faqs: [
-            { q: "¿Qué términos definen mejor la carrera?", a: "Es fundamental hablar de 'Corretaje Inmobiliario' y 'Martillero Judicial'. Nuestro plan forma específicamente para el ejercicio de ambas profesiones, brindando un perfil completo y competitivo." },
-            { q: "¿Qué diferencia hay entre Gestor y Martillero?", a: "El Gestor se enfoca en la administración y venta de inmuebles. El Martillero puede realizar remates (subastas) de cualquier tipo de bien, judicial o privado." },
-            { q: "¿Cómo es la continuidad universitaria?", a: "Gracias a la articulación con la Universidad Siglo 21, podés continuar tus estudios y obtener un título de grado universitario complementando tu tecnicatura." },
-            { q: "¿Puedo trabajar en la justicia?", a: "Sí, el título te habilita para inscribirte como auxiliar de justicia y realizar subastas ordenadas por jueces." }
-        ],
-        tips_asesor: {
-            evitar: ["Solo Gestor Inmobiliario", "Curso corto sin validez"],
-            argumentos: ["Corretaje Inmobiliario", "Martillero Judicial", "Doble Titulación Habilitante", "Subasta Experimental en Vivo"]
-        }
-    }
-  },
-  {
-    id: 8,
-    code: "IA",
-    nombre: "Ciencia de Datos e IA",
-    area: "Informática",
-    color: COLORS.IA,
-    duracion: "2.5 Años",
-    modalidad_corta: "Semi-Presencial",
-    descripcion: "Análisis de grandes volúmenes de datos y desarrollo de modelos de inteligencia artificial.",
-    link_plan: "https://www.cervantes.edu.ar/carreras/tucarrera.asp?c=21",
-    perfil_profesional: "Profesional capacitado para analizar y procesar grandes volúmenes de datos (Big Data) para extraer información útil, desarrollar sistemas inteligentes y aplicar modelos de aprendizaje automático (Machine Learning) para resolver problemas en diversos sectores como salud, industria, finanzas y tecnología. Utiliza herramientas avanzadas para transformar datos en soluciones estratégicas.",
-    detalle: {
-        propuesta_valor: [
-            "Alta Demanda Laboral: Perfil altamente solicitado por empresas tecnológicas, industriales y de servicios.",
-            "Formación Integral y Actualizada: Aprendizaje de tecnologías clave como Python, Data Mining, Machine Learning y Deep Learning.",
-            "Prácticas Profesionales: Incluye prácticas enfocadas en empresas del sector PyME para ganar experiencia real.",
-            "Certificación y Reconocimiento: Título oficial que valida competencias y certificaciones adicionales en tecnologías específicas.",
-            "Orientación a la Innovación: Desarrollo de capacidad analítica y creativa para proyectos corporativos o independientes.",
-            "Curso de Nivelación: Capacitación previa en técnicas de estudio e introducción a la programación."
-        ],
-        horarios: "18:00 a 23:00 hs.",
-        modalidades: [{ 
-            tipo: "Semi-Presencial", 
-            desc: "Un día de cursado semanal presencial + tutorías semanales de apoyo." 
-        }],
-        requisitos: [
-            "Título Secundario completo.",
-            "Conocimientos mínimos de PC.",
-            "Computadora personal con requisitos básicos."
-        ],
-        faqs: [
-            { q: "¿Necesito conocimientos previos en programación?", a: "No es excluyente. La carrera incluye un curso de nivelación, aunque se valora el interés por la lógica." },
-            { q: "¿Qué materias voy a ver?", a: "Programación, Base de Datos, Machine Learning, Matemática, Estadística, Ciberseguridad, Project Management, entre otras." },
-            { q: "¿Es mucha matemática?", a: "La matemática y la estadística son pilares fundamentales, pero se enseñan aplicadas a la resolución de problemas de datos." },
-            { q: "¿Qué salida laboral tiene?", a: "Desde empresas de software hasta industrias tradicionales que buscan digitalizarse. Roles como Data Scientist, Analista de Datos, Especialista en IA." }
-        ],
-        tips_asesor: {
-            evitar: ["No necesitas estudiar nada antes (Mejor: hay nivelación)", "Es fácil/difícil (Mejor: es desafiante)", "Es solo para techies"],
-            argumentos: ["Alta Empleabilidad", "Formación de Futuro", "Base sólida en Matemáticas y Programación"]
-        }
-    }
-  }
-];
+        // --- ICONOS INLINE (Para evitar errores de librería externa) ---
+        const IconBase = ({ children, size = 24, className = "", ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+                {children}
+            </svg>
+        );
 
+        const BookOpen = (props) => <IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></IconBase>;
+        const Users = (props) => <IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>;
+        const Briefcase = (props) => <IconBase {...props}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></IconBase>;
+        const Clock = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></IconBase>;
+        const Award = (props) => <IconBase {...props}><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></IconBase>;
+        const ChevronRight = (props) => <IconBase {...props}><path d="m9 18 6-6-6-6"/></IconBase>;
+        const BarChart3 = (props) => <IconBase {...props}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></IconBase>;
+        const XIcon = (props) => <IconBase {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconBase>; // Renamed to XIcon to avoid conflict
+        const Info = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconBase>;
+        const ArrowLeft = (props) => <IconBase {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></IconBase>;
+        const CheckCircle2 = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></IconBase>;
+        const Lightbulb = (props) => <IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2.4 1.5-3.8 0-3.2-2.8-5.7-6-5.7s-6 2.5-6 5.7c0 1.4.5 2.8 1.5 3.8.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>;
+        const Scale = (props) => <IconBase {...props}><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></IconBase>;
+        const Table2 = (props) => <IconBase {...props}><path d="M9 3H5a2 2 0 0 0-2 2v4h6z"/><path d="M9 21H5a2 2 0 0 1-2-2v-4h6z"/><path d="M21 3h-4v6h6V5a2 2 0 0 0-2-2z"/><path d="M21 21h-4v-6h6v4a2 2 0 0 1-2 2z"/><path d="M9 3v18"/><path d="M15 3v18"/></IconBase>;
+        const MessageCircle = (props) => <IconBase {...props}><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></IconBase>;
+        const Copy = (props) => <IconBase {...props}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></IconBase>;
+        const Check = (props) => <IconBase {...props}><path d="M20 6 9 17l-5-5"/></IconBase>;
+        const Zap = (props) => <IconBase {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></IconBase>;
+        const Target = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></IconBase>;
+        const Star = (props) => <IconBase {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconBase>;
+        const GraduationCap = (props) => <IconBase {...props}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></IconBase>;
+        const Speech = (props) => <IconBase {...props}><path d="M8.8 20v-4.1l1.9.2a2.3 2.3 0 0 0 2.164-2.1V8.3A5.37 5.37 0 0 0 2 8.25c0 2.85 2.19 5.27 5 5.35 1.68.04 3.13-.56 4.2-1.5"/><path d="M16 16v-4.1l1.9.2a2.3 2.3 0 0 0 2.164-2.1V4.3A5.37 5.37 0 0 0 14.8 4.25c-2.85 0-5.27 2.19-5.35 5"/></IconBase>;
+        const BrainCircuit = (props) => <IconBase {...props}><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.875A3 3 0 0 0 3 12a9 9 0 0 0 9 9 9 9 0 0 0 9-9 3 3 0 0 0-.477-1.125"/><path d="M12 2v4"/><path d="M12 18v4"/></IconBase>;
+        const ShieldCheck = (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></IconBase>;
+        const XCircle = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></IconBase>;
+        const Hammer = (props) => <IconBase {...props}><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V7.86c0-.55-.45-1-1-1H14c-.55 0-1 .45-1 1v3.8c0 .85-.33 1.65-.93 2.25L10.82 15"/></IconBase>;
+        const TrendingUp = (props) => <IconBase {...props}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></IconBase>;
 
-// --- COMPONENTES UI ---
+        // --- DATA DE TABLAS COMPARATIVAS ---
+        const TABLA_INFORMATICA = {
+            headers: ["Aspecto", "Desarrollo Web", "Analista de Sistemas", "Ciencia de Datos e IA"],
+            rows: [
+                ["Duración", "2½ años", "3 años", "2½ años"],
+                ["Nivel de complejidad", "Medio", "Medio", "Alto"],
+                ["Empieza desde cero", "Sí", "Sí", "Sí (con prep.)"],
+                ["Foco principal", "Crear sitios y apps", "Diseñar sistemas", "Analizar datos e IA"],
+                ["Problema que resuelve", "Presencia digital", "Organización interna", "Decisiones y predicción"],
+                ["Perfil ideal", "Creativo / práctico", "Analítico / organizador", "Analítico / lógico"],
+                ["Salida laboral", "Rápida y freelance", "Amplia y sostenida", "Más especializada"],
+                ["Diferencial clave", "Portfolio y rapidez", "Visión integral", "Tecnología del futuro"]
+            ]
+        };
 
-const GlassCard = ({ children, className = "", color, onClick }) => {
-  const [hover, setHover] = useState(false);
+        const TABLA_EMPRESARIAL = {
+            headers: ["Aspecto", "Recursos Humanos", "Marketing", "Adm. de Empresas"],
+            rows: [
+                ["Eje principal", "Personas", "Mercado y clientes", "Gestión integral"],
+                ["Pregunta clave", "¿Cómo gestiono gente?", "¿Cómo vendo más?", "¿Cómo funciona la org?"],
+                ["Foco del trabajo", "Selección, clima, sueldos", "Ventas, publicidad", "Procesos, recursos"],
+                ["Perfil ideal", "Social, empático", "Creativo, comercial", "Analítico, gestor"],
+                ["Salida laboral", "Área RRHH, consultoría", "Comercial, agencias", "Admin., mando medio"],
+                ["Visión de empresa", "Parcial (personas)", "Parcial (mercado)", "Total (todas las áreas)"],
+                ["Frase de venta", "'Trabajás con personas'", "'Trabajás con ventas'", "'Manejas una empresa'"]
+            ]
+        };
 
-  return (
-    <div 
-      className={`relative overflow-hidden rounded-2xl border border-white/30 shadow-lg backdrop-blur-md transition-all duration-300 cursor-pointer ${className}`}
-      style={{
-        background: hover ? `linear-gradient(145deg, ${color}dd, ${color}aa)` : 'rgba(255, 255, 255, 0.2)',
-        transform: hover ? 'translateY(-5px)' : 'translateY(0)',
-        boxShadow: hover ? `0 15px 30px -5px ${color}66` : '0 4px 6px rgba(0,0,0,0.1)'
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={onClick}
-    >
-      <div className={`p-6 relative z-10 h-full flex flex-col ${hover ? 'text-white' : 'text-slate-800'}`}>
-        {children}
-      </div>
-    </div>
-  );
-};
+        const TABLA_CURSO_VS_CARRERA = {
+            headers: ["", "Curso / Bootcamp", "Carrera Web (Cervantes)"],
+            rows: [
+                ["Plazo", "Corto plazo", "Formación integral"],
+                ["Enfoque", "Herramienta puntual", "Fundamentos + Práctica real"],
+                ["Título", "Sin título oficial", "Título Oficial"],
+                ["Futuro", "No garantiza continuidad", "Perfil profesional sólido"],
+                ["Objetivo", "Ideal para probar", "Ideal para trabajar y vivir de esto"]
+            ]
+        };
 
-const DetailSection = ({ title, icon: Icon, children, color }) => (
-  <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/50 mb-6">
-    <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: color }}>
-      <Icon size={24} /> {title}
-    </h3>
-    <div className="text-slate-700 leading-relaxed">
-      {children}
-    </div>
-  </div>
-);
+        const TABLA_IA_CREENCIA_VS_REALIDAD = {
+            headers: ["Lo que se cree", "Lo que es (Realidad)"],
+            rows: [
+                ["Solo código", "Análisis + criterio"],
+                ["Matemática dura", "Lógica aplicada y práctica"],
+                ["Solo tecnología", "Negocios + decisiones"],
+                ["Algo lejano", "Aplicación real hoy"],
+                ["Solo IT", "Multidisciplinaria"]
+            ]
+        };
 
-const AdvisorTips = ({ tips }) => {
-    if (!tips) return null;
-    return (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-xl mb-8 shadow-sm">
-            <h3 className="text-lg font-bold text-yellow-800 flex items-center gap-2 mb-3">
-                <Lightbulb size={20} /> TIPS PARA EL ASESOR (Uso Interno)
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                    <h4 className="font-bold text-green-700 text-sm mb-2 flex items-center gap-1"><CheckCircle2 size={16}/> Argumentos Clave (SÍ DECIR)</h4>
-                    <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
-                        {tips.argumentos.map((t, i) => <li key={i}>{t}</li>)}
-                    </ul>
-                </div>
-                <div>
-                    <h4 className="font-bold text-red-700 text-sm mb-2 flex items-center gap-1"><AlertTriangle size={16}/> Frases a Evitar (NO DECIR)</h4>
-                    <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
-                        {tips.evitar.map((t, i) => <li key={i}>{t}</li>)}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    );
-};
+        const TABLA_ADMIN_CREENCIA_VS_REALIDAD = {
+            headers: ["Lo que se cree", "Lo que es (Realidad)"],
+            rows: [
+                ["Carrera 'genérica'", "Visión estratégica"],
+                ["Solo para empleados", "Empleo + Consultoría + Emprender"],
+                ["Solo números", "Gestión y decisiones"],
+                ["Poco clara", "Muy versátil y adaptable"]
+            ]
+        };
 
-// --- APP PRINCIPAL ---
+        const TABLA_RRHH_CREENCIA_VS_REALIDAD = {
+            headers: ["Lo que se cree", "Lo que es (Realidad)"],
+            rows: [
+                ["Trato humano", "Gestión estratégica"],
+                ["Solo selección", "Gestión integral"],
+                ["Carrera blanda", "Carrera estratégica"],
+                ["Poca salida", "Alta demanda en toda org."]
+            ]
+        };
 
-export default function App() {
-  const [selectedCareer, setSelectedCareer] = useState(null);
+        const TABLA_SYS_CREENCIA_VS_REALIDAD = {
+            headers: ["Lo que se cree", "Lo que es (Realidad)"],
+            rows: [
+                ["Solo código", "Análisis + solución"],
+                ["Soporte técnico", "Diseño de sistemas"],
+                ["Carrera larga", "Certificaciones progresivas"],
+                ["Muy técnica", "Técnica + lógica"]
+            ]
+        };
 
-  // Control del fondo dinámico
-  const backgroundStyle = {
-    backgroundImage: 'url("https://i.postimg.cc/6wfDzyN9/image.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
-  };
+        const TABLA_HYS_CREENCIA_VS_REALIDAD = {
+            headers: ["Lo que se cree", "Lo que es (Realidad)"],
+            rows: [
+                ["Solo normas", "Prevención real"],
+                ["Solo industria", "Todo ámbito laboral"],
+                ["Carrera técnica", "Carrera estratégica"],
+                ["Poco trabajo", "Alta demanda obligatoria"]
+            ]
+        };
 
-  // El overlay cambia según si hay una carrera seleccionada
-  const overlayStyle = {
-    backgroundColor: selectedCareer ? selectedCareer.color : '#0f172a', // Color carrera o Azul oscuro default
-    opacity: selectedCareer ? 0.92 : 0.2, // Más opaco cuando hay info para leer, muy transparente en home
-    transition: 'all 0.6s ease-in-out'
-  };
-  
-  const handleDownload = (careerName) => {
-      alert(`Descargando archivo informativo de ${careerName}... \n(Aquí se vinculará el PDF real)`);
-  };
+        // --- DATA ACTUALIZADA ---
+        const CARRERAS = [
+            {
+                id: 1,
+                slug: "analista-de-sistemas",
+                nombre: "Analista de Sistemas de Computación",
+                area: "INFORMÁTICA",
+                color: "#00b1e1", // ASC
+                duracion: "3 Años",
+                titulo_final: "Analista de Sistemas de Computación",
+                titulo_intermedio: "Certificaciones Internas:\n• 1º Año: Técnico Informático\n• 2º Año: Analista Programador",
+                modalidad: "Presencial / Semipresencial",
+                descripcion: "Forma profesionales que analizan problemas de empresas y desarrollan soluciones informáticas. No es solo programar: es entender necesidades y convertirlas en sistemas reales.",
+                materias_clave: ["Programación Web", "Bases de Datos", "Ingeniería de Software", "Scrum / Metodologías Ágiles"],
+                perfil: "Ideal para perfiles analíticos y lógicos que disfrutan resolver problemas. Interés por la tecnología aplicada y el funcionamiento de las cosas. Buscan crecimiento y estabilidad profesional.",
+                mas_info: [
+                    {
+                        titulo: "❌ Mitos Frecuentes (y cómo romperlos)",
+                        contenido: "❌ **'Es solo programación'**\n🟢 **Realidad:** Programar es escribir código; analizar sistemas es pensar soluciones. El analista entiende problemas y diseña soluciones completas.\n\n❌ **'Es arreglar computadoras'**\n🟢 **Realidad:** Eso es soporte técnico. Analista de Sistemas trabaja con software, procesos, datos y estrategia de negocio.\n\n❌ **'Es muy difícil'**\n🟢 **Realidad:** Requiere lógica y constancia, pero no conocimientos previos. Se empieza desde cero."
+                    },
+                    {
+                        titulo: "🔍 ¿Qué ES realmente?",
+                        contenido: "Es el puente entre el negocio y la tecnología. Un analista diseña sistemas, gestiona bases de datos e integra tecnología con procesos reales para optimizar organizaciones."
+                    },
+                    {
+                        titulo: "🧠 Creencia vs Realidad",
+                        tableData: TABLA_SYS_CREENCIA_VS_REALIDAD
+                    },
+                    {
+                        titulo: "🎓 Certificaciones Intermedias (Gran Diferencial)",
+                        contenido: "No tenés que esperar al final para certificarte:\n✅ **1º Año:** Técnico Informático\n✅ **2º Año:** Analista Programador\n👉 Esto permite salir a trabajar antes y sumar experiencia."
+                    },
+                    { 
+                        titulo: "⭐ Diferenciales Cervantes", 
+                        contenido: "• **Formación Progresiva:** Certificaciones intermedias reales.\n• **Aulas Hibridadas:** Tecnología de punta para cursado flexible.\n• **Enfoque Dual:** Análisis + Programación.\n• **Práctica Real:** Formación en Scrum y vinculación con el Cluster Tecnológico." 
+                    },
+                    { 
+                        titulo: "🗣️ Frases a utilizar en la venta", 
+                        contenido: "🔑 'No solo programás, pensás sistemas.'\n🔑 'La tecnología necesita personas que la entiendan.'\n🔑 'Es una carrera con salida laboral constante.'\n🔑 'Podés trabajar antes de terminarla gracias a los títulos intermedios.'" 
+                    },
+                    {
+                        titulo: "🎯 Cierre Comercial Fuerte",
+                        contenido: "**'Si te gusta la tecnología, la lógica y querés una carrera con certificaciones intermedias, salida laboral rápida y crecimiento constante, Analista de Sistemas es una opción sólida y estratégica.'**"
+                    },
+                    {
+                        titulo: "Comparativa Carreras Informáticas",
+                        tableData: TABLA_INFORMATICA
+                    }
+                ]
+            },
+            {
+                id: 6,
+                slug: "desarrollo-web",
+                nombre: "Desarrollo Web y Aplicaciones Digitales",
+                area: "INFORMÁTICA",
+                color: "#a8927d", // DW
+                duracion: "2.5 Años",
+                titulo_final: "Técnico Superior en Desarrollo Web y Aplicaciones Digitales",
+                titulo_intermedio: "Certificación Profesional",
+                modalidad: "Semipresencial",
+                descripcion: "Forma desarrolladores web preparados para crear sitios y aplicaciones modernas. Es una carrera corta, práctica y con alta empleabilidad, incluso en trabajos remotos.",
+                materias_clave: ["HTML/CSS", "JavaScript", "React", "Node.js", "Bases de Datos NoSQL"],
+                perfil: "Ideal para quien quiere insertarse rápido en tecnología. Personas creativas y lógicas que buscan trabajar remoto o freelance.",
+                mas_info: [
+                    { 
+                        titulo: "💻 Tips Clave para Vender", 
+                        contenido: "🔴 **Romper el mito:** 'No es solo hacer páginas web'. Aprendés a crear soluciones digitales completas: Apps, Sistemas, Plataformas seguras.\n👉 **Frase clave:** 'No formamos diseñadores de páginas, formamos desarrolladores.'\n\n🟢 **Salida Laboral Real:** Empresas, Agencias, Freelance y clientes del exterior. Es una de las pocas carreras donde el límite lo ponés vos." 
+                    },
+                    {
+                        titulo: "🎓 Carrera vs 📚 Curso: Diferencia Clave",
+                        contenido: "Muchos comparan con cursos cortos o bootcamps. \n👉 **Un curso** enseña una herramienta puntual. \n👉 **La carrera** enseña fundamentos, lógica y programación real. Te permite adaptarte a tecnologías nuevas y no quedar obsoleto.\n\n**Frase para venderlo:** 'Un curso te enseña a usar algo. La carrera te enseña a ser desarrollador.'",
+                        tableData: TABLA_CURSO_VS_CARRERA
+                    },
+                    {
+                        titulo: "⭐ Diferenciales Cervantes",
+                        contenido: "• **Aulas Hibridadas:** Cursado adaptado a la tecnología actual.\n• **Práctica 100%:** Bootcamps y workshops reales.\n• **Portfolio:** Desarrollás proyectos propios durante la carrera.\n• **Inserción Rápida:** Pensada para el mercado laboral actual."
+                    },
+                    {
+                        titulo: "🗣️ Frases a utilizar en la venta",
+                        contenido: "💬 'No aprendés solo herramientas, aprendés a desarrollar.'\n💬 'Es una carrera para crear, no para consumir tecnología.'\n💬 'Lo que hoy es una app, mañana puede ser tu proyecto.'\n💬 'Si querés aprender algo puntual, un curso alcanza. Si querés vivir de esto, necesitás la carrera.'\n💬 'En poco tiempo podés estar trabajando y cobrando en tecnología.'"
+                    },
+                    {
+                        titulo: "Comparativa Carreras Informáticas",
+                        tableData: TABLA_INFORMATICA
+                    }
+                ]
+            },
+            {
+                id: 8,
+                slug: "ciencia-de-datos-ia",
+                nombre: "Ciencia de Datos e Inteligencia Artificial",
+                area: "INFORMÁTICA",
+                color: "#2d4693", // IA/CD
+                duracion: "2.5 Años",
+                titulo_final: "Técnico Superior en Ciencia de Datos e Inteligencia Artificial",
+                titulo_intermedio: "Certificación en Análisis de Datos",
+                modalidad: "Semipresencial",
+                descripcion: "Forma profesionales capaces de analizar grandes volúmenes de datos y desarrollar soluciones con Inteligencia Artificial y Machine Learning.",
+                materias_clave: ["Python", "Machine Learning", "Big Data", "Estadística Aplicada", "Deep Learning"],
+                perfil: "Personas curiosas que disfrutan resolver problemas y buscar el 'por qué'. Interés en tecnología aplicada y negocios. No requiere experiencia previa en programación.",
+                mas_info: [
+                    { 
+                        titulo: "❌ Mitos Frecuentes (y cómo romperlos)", 
+                        contenido: "❌ **'Es solo para genios de las matemáticas'**\n🟢 **Realidad:** Se usan números con sentido práctico para tomar decisiones. *'No necesitás ser Einstein, necesitás saber interpretar datos.'*\n\n❌ **'Es solo programar todo el día'**\n🟢 **Realidad:** Programar es una herramienta. Un científico de datos piensa, analiza y decide. *'Un científico de datos piensa más de lo que codea.'*\n\n❌ **'La IA va a reemplazar a las personas'**\n🟢 **Realidad:** La IA potencia. *'La IA no reemplaza personas, reemplaza a quienes no saben usarla.'*" 
+                    },
+                    {
+                        titulo: "🔍 ¿Qué ES realmente?",
+                        contenido: "Es la carrera que forma profesionales capaces de:\n• Analizar grandes volúmenes de datos.\n• Detectar patrones y oportunidades.\n• Predecir comportamientos y automatizar con IA.\n\n👉 **No es 'hacer robots', es hacer negocios más inteligentes.**"
+                    },
+                    {
+                        titulo: "🧠 Creencia vs Realidad",
+                        tableData: TABLA_IA_CREENCIA_VS_REALIDAD
+                    },
+                    {
+                        titulo: "⭐ Diferenciales Cervantes",
+                        contenido: "• **Enfoque Práctico:** Carrera pensada para aplicación real, no solo teoría.\n• **Aulas Hibridadas:** Tecnología para un cursado flexible y moderno.\n• **Actualización Constante:** Contenidos alineados a lo que piden las empresas hoy.\n• **Docentes del Rubro:** Profesionales que trabajan en IA y Datos.\n• **Perfil de Decisión:** No formamos investigadores aislados, formamos profesionales que toman decisiones."
+                    },
+                    {
+                        titulo: "💼 Salida Laboral",
+                        contenido: "Analista de datos, Analista de IA, Consultor en datos, Apoyo estratégico en áreas comerciales o financieras.\n📌 **Dato:** Muchos combinan trabajo en relación de dependencia con consultorías independientes."
+                    },
+                    {
+                        titulo: "🗣️ Frases Listas para Vender",
+                        contenido: "🔑 'No se trata de datos, se trata de decisiones.'\n🔑 'La IA sin criterio no sirve.'\n🔑 'Hoy las empresas no compiten por precio, compiten por información.'\n🔑 'Los datos no hablan solos, necesitan alguien que los interprete.'\n🔑 'Es una carrera para pensar, no solo para programar.'"
+                    },
+                    {
+                        titulo: "🎯 Cierre Comercial Fuerte",
+                        contenido: "**'Si te gusta analizar, entender patrones y tomar decisiones con información real, esta carrera es para vos. La tecnología cambia, pero la capacidad de interpretar datos siempre vale.'**"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                slug: "higiene-y-seguridad",
+                nombre: "Higiene y Seguridad Laboral",
+                area: "INDUSTRIAL",
+                color: "#f4c01e", // HYS
+                duracion: "3 Años",
+                titulo_final: "Técnico Superior en Higiene y Seguridad Laboral",
+                titulo_intermedio: "Certificación Oficial",
+                modalidad: "Presencial / Semipresencial",
+                descripcion: "Forma profesionales que previenen accidentes y cuidan la salud de los trabajadores en empresas, obras e industrias. Amplia salida laboral en todo el país.",
+                materias_clave: ["Seguridad Industrial", "Medicina Laboral", "Legislación Ambiental", "Ergonomía"],
+                perfil: "Ideal para personas con conciencia social, observadoras y metódicas. Buscan una carrera con salida laboral concreta y trabajar en campo (obras, industrias) cuidando personas.",
+                mas_info: [
+                    {
+                        titulo: "❌ Mitos Frecuentes (y cómo romperlos)",
+                        contenido: "❌ **'Es solo usar casco y normas'**\n🟢 **Realidad:** Eso es lo visible. El objetivo es prevenir accidentes antes de que ocurran. *'El mejor accidente es el que nunca pasa.'*\n\n❌ **'Es una carrera solo para fábricas'**\n🟢 **Realidad:** Aplica en comercios, servicios, hospitales, eventos, escuelas. Donde hay trabajo, hay riesgos.\n\n❌ **'Es solo cumplir normas'**\n🟢 **Realidad:** Es gestión preventiva. Detectar riesgos, capacitar y evitar pérdidas."
+                    },
+                    {
+                        titulo: "🎓 Diferencia Clave: Técnico vs Licenciado vs Curso",
+                        contenido: "📚 **Curso:** Corto, no habilita, solo complemento.\n🎓 **Técnico (Cervantes):** Habilitante, salida rápida, perfil operativo y preventivo. *'El que las empresas necesitan día a día.'*\n🎓 **Licenciado:** Más teórico, gestión macro, auditorías. *'El licenciado planifica, el técnico previene y ejecuta.'*"
+                    },
+                    {
+                        titulo: "🧠 Creencia vs Realidad",
+                        tableData: TABLA_HYS_CREENCIA_VS_REALIDAD
+                    },
+                    { 
+                        titulo: "⭐ Diferenciales Cervantes", 
+                        contenido: "• **Enfoque Preventivo Real:** No formamos inspectores de escritorio.\n• **Aulas Hibridadas:** Flexibilidad para las clases teóricas.\n• **Práctica Real:** Visitas a plantas y obras reales.\n• **Vínculos:** Red de contactos con ART, sindicatos y el Ministerio de Trabajo.\n• **Eventos:** Jornada anual de Higiene y Seguridad (referente desde 2009)." 
+                    },
+                    {
+                        titulo: "🗣️ Frases a utilizar en la venta",
+                        contenido: "🔑 'La prevención salva vidas.'\n🔑 'Las empresas necesitan prevenir, no pagar multas.'\n🔑 'Cuidar personas también es cuidar el negocio.'\n🔑 'Higiene y Seguridad es anticiparse.'"
+                    },
+                    {
+                        titulo: "🎯 Cierre Comercial Fuerte",
+                        contenido: "**'Si te interesa cuidar personas, prevenir riesgos y trabajar en una carrera con muchísima salida laboral, Higiene y Seguridad es una opción sólida, práctica y muy demandada.'**"
+                    }
+                ]
+            },
+            {
+                id: 7,
+                slug: "gestion-inmobiliaria",
+                nombre: "Gestión Inmobiliaria",
+                area: "JURÍDICA",
+                color: "#bb242a", // GI
+                duracion: "2.5 Años",
+                titulo_final: "Técnico Superior en Gestión Inmobiliaria",
+                titulo_intermedio: "Certificación Interna (2º Año):\nDiplomado en Administración Inmobiliaria",
+                extra_info_titulo: "⚖️ Articulación: Martillero y Corredor Público (Siglo 21)",
+                modalidad: "Presencial / Semipresencial / Distancia",
+                descripcion: "Forma profesionales capaces de gestionar, comercializar y desarrollar negocios inmobiliarios. Prepara para trabajar en inmobiliarias o desarrollar un proyecto propio.",
+                materias_clave: ["Tasación y Cotización", "Contratos y Locaciones", "Marketing Inmobiliario", "Subastas Privadas y Judiciales"],
+                perfil: "Personas con perfil comercial interesadas en bienes raíces. Disfrutan el trato con clientes y buscan independencia laboral en un sector dinámico y rentable.",
+                mas_info: [
+                    {
+                        titulo: "❌ Mitos Frecuentes",
+                        contenido: "❌ **'Es lo mismo que Martillero'**\n🟢 **Realidad:** Son roles distintos. *'El martillero firma, el gestor hace que el negocio funcione.'*\n\n❌ **'Si no sos martillero, no podés trabajar'**\n🟢 **Realidad:** La mayoría del trabajo (captar, vender, alquilar, administrar) lo hace el Gestor Inmobiliario."
+                    },
+                    {
+                        titulo: "🔍 ¿Qué ES realmente?",
+                        contenido: "Es la columna operativa y comercial del sector. Un gestor administra propiedades, asesora clientes, analiza el mercado y coordina alquileres y ventas."
+                    },
+                    {
+                        titulo: "⚖️ Diferencia Clara: Gestor vs Martillero",
+                        contenido: "🏘️ **Gestor Inmobiliario (Cervantes):** Capta, vende, administra, mueve el negocio día a día.\n⚖️ **Martillero y Corredor:** Firma escrituras, interviene legalmente, hace subastas.\n👉 **'El gestor trabaja el negocio; el martillero lo legaliza.'**"
+                    },
+                    {
+                        titulo: "🎓 Camino Profesional (Gran Diferencial)",
+                        contenido: "🔹 **Paso 1:** Tecnicatura en Gestión Inmobiliaria (Salida laboral rápida y experiencia).\n🔹 **Paso 2 (Opcional):** Articulación con Siglo 21. Cursando **Derechos Reales (aprox. 6 meses)** obtenés el título de grado de Martillero y Corredor Público.\n⏱️ **Ventaja:** Podés cursar Derechos Reales en paralelo con tu último semestre en Cervantes."
+                    },
+                    {
+                        titulo: "⭐ Diferenciales Cervantes",
+                        contenido: "• **Enfoque Comercial:** Te preparamos para abrir tu propia inmobiliaria.\n• **Aulas Hibridadas:** Cursado flexible.\n• **Práctica Única:** Subasta Experimental (experiencia real simulada).\n• **Perfil Doble:** Fuerte formación jurídica y comercial."
+                    },
+                    {
+                        titulo: "🗣️ Frases a utilizar en la venta",
+                        contenido: "🔑 'El gestor hace que la operación suceda.'\n🔑 'No todo es firmar, primero hay que vender.'\n🔑 'Podés trabajar desde el primer día.'\n🔑 'Primero gestionás, después legalizás.'"
+                    },
+                    {
+                        titulo: "🎯 Cierre Comercial Fuerte",
+                        contenido: "**'Si te interesa el rubro inmobiliario, querés trabajar rápido y tener la posibilidad de crecer hasta matricularte, Gestión Inmobiliaria es una carrera inteligente y estratégica.'**"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                slug: "recursos-humanos",
+                nombre: "Recursos Humanos",
+                area: "EMPRESARIAL",
+                color: "#b388c2", // RH
+                duracion: "3 Años",
+                titulo_final: "Técnico Superior en Recursos Humanos",
+                titulo_intermedio: "Certificación Interna (2º Año):\nAnalista de Recursos Humanos",
+                modalidad: "Presencial / Semipresencial / Distancia",
+                descripcion: "Forma profesionales especializados en la gestión del capital humano. El egresado trabaja en selección, capacitación, administración de personal y clima laboral.",
+                materias_clave: ["Psicología Laboral", "Derecho del Trabajo", "Selección de Personal", "Liquidación de Sueldos"],
+                perfil: "Personas con perfil social y empático. Ideal para quienes les interesa trabajar con personas más que con números y buscan relación de dependencia estable.",
+                mas_info: [
+                    {
+                        titulo: "❌ Mitos Frecuentes (y cómo romperlos)",
+                        contenido: "❌ **'Es solo tratar con personas'**\n🟢 **Realidad:** RRHH es gestión, no solo vínculo. Aprendés a organizar estructuras, tomar decisiones y optimizar equipos. *'No es solo personas, es gestión de personas.'*\n\n❌ **'Es solo selección de personal'**\n🟢 **Realidad:** La selección es solo una parte. Incluye capacitación, evaluación, clima, sueldos y legislación.\n\n❌ **'No tiene salida laboral clara'**\n🟢 **Realidad:** Todas las organizaciones necesitan RRHH. Donde hay personas, hay RRHH."
+                    },
+                    {
+                        titulo: "🔍 ¿Qué ES realmente?",
+                        contenido: "Es la carrera que gestiona el capital humano, diseña procesos de desarrollo, mejora el clima y la productividad, y alinea a las personas con los objetivos del negocio.\n👉 **RRHH conecta personas + resultados.**"
+                    },
+                    {
+                        titulo: "🧠 Creencia vs Realidad",
+                        tableData: TABLA_RRHH_CREENCIA_VS_REALIDAD
+                    },
+                    { 
+                        titulo: "🤝 Consultoría en RRHH", 
+                        contenido: "Un punto clave es la posibilidad de trabajar de forma independiente:\n✅ Asesorar en procesos de selección.\n✅ Diseñar planes de capacitación.\n✅ Trabajar clima y desempeño.\n✅ Profesionalizar áreas en Pymes.\n👉 'No solo trabajás en RRHH, ayudás a las empresas a ordenar sus equipos.'" 
+                    },
+                    { 
+                        titulo: "⭐ Diferenciales Cervantes", 
+                        contenido: "• **Aulas Hibridadas:** Tecnología para facilitar el cursado.\n• **Software de Gestión:** Aprendizaje de herramientas reales.\n• **Prácticas Profesionalizantes:** Convenios y pasantías en empresas reales.\n• **Trayectoria:** Institución reconocida en el rubro empresarial." 
+                    },
+                    {
+                        titulo: "🗣️ Frases a utilizar en la venta",
+                        contenido: "🔑 'RRHH es la columna vertebral de una empresa.'\n🔑 'Las empresas crecen cuando las personas están bien gestionadas.'\n🔑 'No es solo contratar, es desarrollar talento.'\n🔑 'Las personas son el activo más importante.'"
+                    },
+                    {
+                        titulo: "🎯 Cierre Comercial Fuerte",
+                        contenido: "**'Si te interesa trabajar con personas, generar impacto real en equipos y ayudar a que las organizaciones funcionen mejor, Recursos Humanos es una carrera con muchísima salida y proyección.'**"
+                    }
+                ]
+            },
+            {
+                id: 5,
+                slug: "marketing",
+                nombre: "Marketing",
+                area: "EMPRESARIAL",
+                color: "#fa5d0f", // MKT
+                duracion: "3 Años",
+                titulo_final: "Técnico Superior en Marketing",
+                titulo_intermedio: "Certificación Interna (2º Año):\nAnalista en Gestión de Marketing",
+                extra_info_titulo: "🎓 DIPLOMATURA GRATIS: Marketing Digital (CCAP)",
+                modalidad: "Semipresencial / Distancia",
+                descripcion: "Forma profesionales capaces de analizar mercados, desarrollar estrategias comerciales y ejecutar planes de marketing tradicionales y digitales.",
+                materias_clave: ["Estrategia Comercial", "Neuromarketing", "Logística y E-commerce", "SEO / SEM / Redes Sociales"],
+                perfil: "Personas con visión estratégica, inquietas y ambiciosas. Entienden que para vender hay que analizar el mercado primero. Ideal para consultoría.",
+                mas_info: [
+                    { 
+                        titulo: "📊 Marketing vs Marketing Digital", 
+                        contenido: "Muchas veces se confunden, pero no son lo mismo:\n\n👉 **Marketing (La Estrategia):** Analiza mercados, define precios, productos y canales. *Decide qué vender y a quién.*\n👉 **Marketing Digital (La Ejecución):** Redes sociales, pauta, contenidos. *Es la herramienta para comunicar.*\n\n📌 **Frase Clave:** 'El marketing digital ejecuta. El marketing decide.'\nNuestra carrera te enseña ambas cosas."
+                    },
+                    { 
+                        titulo: "🚀 Diplomatura GRATIS (CCAP)", 
+                        contenido: "Al cursar la carrera, obtenés sin cargo la **Diplomatura en Marketing Digital** certificada por la **Cámara de Comercio de Córdoba (CCAP)**. \nEsto te da un doble respaldo: Título Oficial de la carrera + Certificación Específica Digital."
+                    },
+                    { 
+                        titulo: "🤝 El Gran Diferencial: Consultoría", 
+                        contenido: "A diferencia de un Community Manager que solo publica, un profesional de Marketing puede ser **Consultor**:\n\n✅ Analiza negocios completos (Pymes, emprendimientos).\n✅ Detecta problemas de rentabilidad.\n✅ Propone planes de mejora.\n✅ Puede tener múltiples clientes y cobrar por proyecto o asesoría." 
+                    },
+                    {
+                        titulo: "⭐ Diferenciales Cervantes",
+                        contenido: "• **Aulas Hibridadas:** Para cursar de forma flexible.\n• **Doble Certificación:** Título Oficial + Diplo Digital CCAP.\n• **Enfoque en Negocios:** Marketing tradicional + Digital + IA.\n• **Prácticas Reales:** Trabajamos con empresas y casos de mercado."
+                    },
+                    {
+                        titulo: "🗣️ Frases a utilizar en la venta",
+                        contenido: "🔑 'Acá aprendés a vender, no solo a publicar en redes.'\n🔑 'Es la carrera para quienes quieren entender el mercado y hacer crecer negocios.'\n🔑 'No formamos community managers, formamos estrategas comerciales.'\n🔑 'En 2 años ya tenés título de Analista y herramientas para trabajar.'"
+                    },
+                    {
+                        titulo: "Comparativa Empresariales",
+                        tableData: TABLA_EMPRESARIAL
+                    }
+                ]
+            },
+            {
+                id: 4,
+                slug: "administracion-de-empresas",
+                nombre: "Administración de Empresas",
+                area: "EMPRESARIAL",
+                color: "#8da248", // AE
+                duracion: "3 Años",
+                titulo_final: "Técnico Superior en Administración de Empresas",
+                titulo_intermedio: "Certificación Interna (2º Año):\nAnalista en Gestión Administrativa",
+                modalidad: "Presencial / Semipresencial",
+                descripcion: "Forma profesionales capaces de gestionar integralmente organizaciones, participando en la toma de decisiones comerciales, administrativas, financieras y de personal.",
+                materias_clave: ["Contabilidad", "Finanzas Corporativas", "Gestión de Pymes", "Planeamiento Estratégico"],
+                perfil: "Personas analíticas y organizadas que quieren una visión global. Ideal para pymes, emprendimientos y crecimiento interno en empresas.",
+                mas_info: [
+                    {
+                        titulo: "❌ Mitos Frecuentes (y cómo romperlos)",
+                        contenido: "❌ **'Es una carrera muy general'**\n🟢 **Realidad:** Es general a propósito. Te da visión completa para tomar decisiones y dirigir. *'Lo general te da visión, no falta de profundidad.'*\n\n❌ **'Solo sirve para empresas grandes'**\n🟢 **Realidad:** Sirve para Pymes, emprendimientos, negocios familiares y consultoría.\n\n❌ **'Es solo números y papeles'**\n🟢 **Realidad:** Tiene números aplicados a decisiones, estrategia y rentabilidad. *'No forma contadores, forma gestores.'*"
+                    },
+                    {
+                        titulo: "🔍 ¿Qué ES realmente?",
+                        contenido: "Es la carrera para planificar, organizar y hacer crecer un negocio. Es entender la empresa como un sistema completo para tomar decisiones estratégicas."
+                    },
+                    {
+                        titulo: "🧠 Creencia vs Realidad",
+                        tableData: TABLA_ADMIN_CREENCIA_VS_REALIDAD
+                    },
+                    {
+                        titulo: "🤝 Consultoría y Freelance",
+                        contenido: "Uno de los grandes diferenciales es la consultoría. Un administrador puede analizar negocios, detectar problemas y proponer mejoras a múltiples clientes (pymes, emprendedores) sin depender de un solo sueldo.\n👉 *'No solo trabajás en empresas, también ayudás a que las empresas funcionen.'*"
+                    },
+                    { 
+                        titulo: "⭐ Diferenciales Cervantes", 
+                        contenido: "• **Aulas Hibridadas:** Tecnología para optimizar el tiempo de cursado.\n• **Visión 360:** Formación integral en todas las áreas de una empresa.\n• **Herramientas Modernas:** Uso de CRM, IA y software de gestión.\n• **Prácticas Profesionalizantes:** Simulaciones y casos reales."
+                    },
+                    {
+                        titulo: "🗣️ Frases a utilizar en la venta",
+                        contenido: "🔑 'Es la carrera para entender cómo funciona una empresa de verdad.'\n🔑 'No aprendés una tarea, aprendés a gestionar.'\n🔑 'Sirve tanto para trabajar como para emprender.'\n🔑 'Donde hay un negocio, hay lugar para un administrador.'"
+                    },
+                    {
+                        titulo: "🎯 Cierre Comercial Fuerte",
+                        contenido: "**'Si te interesa el mundo de los negocios, querés entender cómo se toman decisiones y te gusta la idea de poder trabajar para otros o para vos mismo, Administración de Empresas es una carrera súper sólida.'**"
+                    },
+                    {
+                        titulo: "Comparativa Empresariales",
+                        tableData: TABLA_EMPRESARIAL
+                    }
+                ]
+            }
+        ];
 
-  return (
-    <div className="min-h-screen font-sans text-slate-800 selection:bg-blue-500 selection:text-white relative">
-      
-      {/* FONDO GLOBAL */}
-      <div className="fixed inset-0 z-0" style={backgroundStyle}>
-        <div className="absolute inset-0" style={overlayStyle}></div>
-      </div>
+        // --- COMPONENTS ---
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        
-        {/* HEADER */}
-        <header className={`transition-all duration-500 px-4 flex flex-col items-center ${selectedCareer ? 'pt-6 pb-4' : 'pt-16 pb-12'}`}>
-          <img 
-            src="https://i.ibb.co/4nqvFQGM/logo.png" 
-            alt="Cervantes Logo" 
-            className={`transition-all duration-500 drop-shadow-lg ${selectedCareer ? 'h-12' : 'h-20 md:h-24'}`}
-          />
-          <p className={`font-light tracking-widest text-white mt-3 uppercase transition-all duration-500 ${selectedCareer ? 'text-xs opacity-80' : 'text-sm md:text-lg opacity-100'}`}>
-            El click que cambia todo
-          </p>
-        </header>
+        const MessageModal = ({ isOpen, onClose, message, careerColor }) => {
+            const [copied, setCopied] = useState(false);
 
-        <main className="flex-grow container mx-auto px-4 md:px-8 pb-12 transition-all duration-500">
-          
-          {/* VISTA: GRID DE CARRERAS */}
-          {!selectedCareer && (
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-              {/* Agrupación por Categorías si se desea, o Grid simple ordenado */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {CARRERAS.map((carrera) => (
-                  <GlassCard 
-                    key={carrera.id} 
-                    color={carrera.color}
-                    onClick={() => setSelectedCareer(carrera)}
-                    className="min-h-[200px]"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider opacity-80 border border-current px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md">
-                        {carrera.area}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2 leading-tight">{carrera.nombre}</h3>
-                    <p className="text-sm opacity-80 mb-4 font-medium flex-grow">
-                      {carrera.descripcion}
-                    </p>
-                    <div className="mt-auto flex items-center gap-3 text-xs font-bold opacity-90 border-t border-current pt-3">
-                      <span className="flex items-center gap-1"><Clock size={14}/> {carrera.duracion}</span>
-                      <span className="flex items-center gap-1"><Users size={14}/> {carrera.modalidad_corta}</span>
-                    </div>
-                  </GlassCard>
-                ))}
-              </div>
-            </div>
-          )}
+            if (!isOpen) return null;
 
-          {/* VISTA: DETALLE DE CARRERA */}
-          {selectedCareer && (
-            <div className="max-w-5xl mx-auto animate-in zoom-in-95 fade-in duration-500">
-              
-              {/* Botón Volver */}
-              <button 
-                onClick={() => setSelectedCareer(null)}
-                className="mb-6 flex items-center gap-2 text-white/90 hover:text-white bg-black/20 hover:bg-black/30 px-4 py-2 rounded-full transition-all backdrop-blur-sm font-medium"
-              >
-                <ArrowLeft size={20} /> Volver a Carreras
-              </button>
+            const handleCopy = () => {
+                navigator.clipboard.writeText(message);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            };
 
-              {/* Tarjeta Principal de Información */}
-              <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border-t-4" style={{ borderColor: selectedCareer.color }}>
-                
-                {/* Encabezado */}
-                <div className="p-8 md:p-12 bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                       <span className="inline-block px-3 py-1 rounded-full text-xs font-bold text-white mb-3 uppercase tracking-wide shadow-sm" style={{ backgroundColor: selectedCareer.color }}>
-                        {selectedCareer.area}
-                      </span>
-                      <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-2">
-                        {selectedCareer.nombre}
-                      </h1>
-                      <p className="text-xl text-slate-500 font-light">
-                        {selectedCareer.descripcion}
-                      </p>
-                    </div>
-                    
-                    {/* Stats */}
-                    <div className="flex gap-4">
-                        <div className="text-center p-4 bg-slate-50 rounded-2xl border border-slate-100 min-w-[100px]">
-                            <Clock className="mx-auto mb-2 text-slate-400" size={24} />
-                            <div className="font-bold text-slate-800">{selectedCareer.duracion}</div>
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-slate-900 border border-white/20 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                            <h3 className="text-white font-bold flex items-center gap-2">
+                                <MessageCircle size={20} className="text-green-400" />
+                                Mensaje para Interesado
+                            </h3>
+                            <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+                                <XIcon size={20} />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <div className="bg-slate-950 p-4 rounded-xl border border-white/10 text-white/90 font-mono text-sm whitespace-pre-wrap max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                {message}
+                            </div>
+                        </div>
+                        <div className="p-4 pt-0 flex gap-3">
+                            <button 
+                                onClick={handleCopy}
+                                className="flex-1 py-3 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 group"
+                                style={{ backgroundColor: copied ? '#10B981' : careerColor }}
+                            >
+                                {copied ? (
+                                    <React.Fragment> <Check size={20} /> ¡Copiado! </React.Fragment>
+                                ) : (
+                                    <React.Fragment> <Copy size={20} className="group-hover:scale-110 transition-transform"/> Copiar Mensaje </React.Fragment>
+                                )}
+                            </button>
                         </div>
                     </div>
-                  </div>
                 </div>
+            );
+        };
 
-                {/* Contenido Scrollable */}
-                <div className="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  
-                  {/* COLUMNA IZQUIERDA (Principal) */}
-                  <div className="lg:col-span-2">
+        const GlassCard = ({ children, className = "", hoverColor, onClick }) => {
+            const [isHovered, setIsHovered] = useState(false);
+
+            const baseStyle = `
+                relative overflow-hidden rounded-2xl border border-white/20 shadow-lg
+                backdrop-blur-md transition-all duration-300 ease-out cursor-pointer
+                ${isHovered ? 'scale-105 z-10' : 'scale-100 z-0'}
+            `;
+
+            const backgroundStyle = {
+                background: isHovered && hoverColor 
+                    ? `linear-gradient(135deg, ${hoverColor}dd 0%, ${hoverColor}aa 100%)`
+                    : 'rgba(255, 255, 255, 0.1)',
+                boxShadow: isHovered 
+                    ? `0 20px 40px -10px ${hoverColor}88, 0 0 20px ${hoverColor}44`
+                    : '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+                borderColor: isHovered ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)'
+            };
+
+            return (
+                <div 
+                    className={`${baseStyle} ${className}`}
+                    style={backgroundStyle}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    onClick={onClick}
+                >
+                    <div className="absolute inset-0 border border-white/10 rounded-2xl pointer-events-none"></div>
+                    <div className={`relative z-10 p-6 ${isHovered ? 'text-white' : 'text-white'}`}>
+                        {children}
+                    </div>
+                </div>
+            );
+        };
+
+        const InfoCard = ({ item, careerColor }) => {
+            const [isHovered, setIsHovered] = useState(false);
+
+            return (
+                <div 
+                    className="bg-black/20 border border-white/10 rounded-2xl p-6 shadow-lg overflow-hidden transition-all duration-300"
+                    style={{
+                        background: isHovered 
+                            ? `linear-gradient(135deg, ${careerColor}dd 0%, ${careerColor}99 100%)` 
+                            : 'rgba(0,0,0,0.2)',
+                        borderColor: isHovered ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)',
+                        boxShadow: isHovered ? `0 15px 35px -10px ${careerColor}66` : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)'
+                    }}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <h4 className="text-xl font-bold mb-3 flex items-center gap-2" style={{ color: isHovered ? '#fff' : '#fde047' }}>
+                        {item.titulo.includes("Propuesta") ? <Award size={22} className={isHovered ? "text-white" : "text-yellow-400"}/> : 
+                        item.titulo.includes("Diferenciales") ? <CheckCircle2 size={22} className={isHovered ? "text-white" : "text-green-400"}/> :
+                        item.titulo.includes("Tips") ? <Lightbulb size={22} className={isHovered ? "text-white" : "text-purple-400"}/> :
+                        item.titulo.includes("Comparativa") ? <Table2 size={22} className={isHovered ? "text-white" : "text-blue-400"}/> :
+                        item.titulo.includes("Creencia") ? <BrainCircuit size={22} className={isHovered ? "text-white" : "text-pink-400"}/> :
+                        item.titulo.includes("Mitos") ? <XCircle size={22} className={isHovered ? "text-white" : "text-red-400"}/> :
+                        item.titulo.includes("Curso") ? <Table2 size={22} className={isHovered ? "text-white" : "text-blue-400"}/> :
+                        item.titulo.includes("Gestor vs Martillero") ? <Scale size={22} className={isHovered ? "text-white" : "text-red-400"}/> :
+                        item.titulo.includes("Diplomatura") ? <GraduationCap size={22} className={isHovered ? "text-white" : "text-orange-400"}/> :
+                        item.titulo.includes("Título") ? <Star size={22} className={isHovered ? "text-white" : "text-yellow-200"}/> :
+                        item.titulo.includes("Consultoría") ? <Briefcase size={22} className={isHovered ? "text-white" : "text-blue-400"}/> :
+                        item.titulo.includes("hacer") ? <Zap size={22} className={isHovered ? "text-white" : "text-yellow-200"}/> :
+                        item.titulo.includes("trabajar") ? <Target size={22} className={isHovered ? "text-white" : "text-red-300"}/> :
+                        item.titulo.includes("Frases") ? <Speech size={22} className={isHovered ? "text-white" : "text-pink-400"}/> :
+                        item.titulo.includes("Salida") ? <Briefcase size={22} className={isHovered ? "text-white" : "text-green-300"}/> :
+                        item.titulo.includes("realmente") ? <Info size={22} className={isHovered ? "text-white" : "text-cyan-300"}/> :
+                        item.titulo.includes("Cierre") ? <ShieldCheck size={22} className={isHovered ? "text-white" : "text-emerald-400"}/> :
+                        <ChevronRight size={22} className={isHovered ? "text-white" : "text-white/70"}/>}
+                        {item.titulo}
+                    </h4>
                     
-                    {/* SECCIÓN SOLO PARA ASESORES (NUEVO) */}
-                    <AdvisorTips tips={selectedCareer.tips_asesor} />
-
-                    {/* Perfil Profesional */}
-                    <div className="bg-slate-50 rounded-xl p-6 border-l-4 mb-8 shadow-sm" style={{ borderColor: selectedCareer.color }}>
-                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-slate-800">
-                            <Briefcase size={24} style={{ color: selectedCareer.color }} /> 
-                            ¿Qué hace el profesional?
-                        </h3>
-                        <p className="text-slate-700 leading-relaxed text-lg">
-                            {selectedCareer.perfil_profesional}
-                        </p>
-                    </div>
-
-                    {/* Propuesta de Valor */}
-                    <DetailSection title="Por qué elegir esta carrera" icon={Award} color={selectedCareer.color}>
-                      <ul className="space-y-3">
-                        {selectedCareer.detalle.propuesta_valor.map((item, i) => (
-                          <li key={i} className="flex items-start gap-3">
-                            <CheckCircle2 className="min-w-[20px] mt-1" size={20} color={selectedCareer.color} />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </DetailSection>
-
-                     {/* Preguntas Frecuentes */}
-                    <DetailSection title="Preguntas Frecuentes" icon={HelpCircle} color={selectedCareer.color}>
-                      <div className="space-y-4">
-                        {selectedCareer.detalle.faqs.map((faq, i) => (
-                          <div key={i} className="bg-slate-50 p-4 rounded-lg">
-                            <h5 className="font-bold text-slate-900 mb-1">{faq.q}</h5>
-                            <p className="text-slate-600 text-sm">{faq.a}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </DetailSection>
-                  </div>
-
-                  {/* COLUMNA DERECHA (Datos Duros) */}
-                  <div className="space-y-6">
-                    
-                    {/* Botón Ver Plan de Estudio */}
-                    <a 
-                      href={selectedCareer.link_plan} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block w-full py-4 rounded-xl font-bold text-center shadow-md transition-all transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2 border-2 group"
-                      style={{ borderColor: selectedCareer.color, color: selectedCareer.color, backgroundColor: 'white' }}
-                    >
-                        <FileText size={20} /> VER PLAN DE ESTUDIO <ExternalLink size={16} className="opacity-50 group-hover:opacity-100" />
-                    </a>
-
-                    {/* Horarios y Modalidad */}
-                    <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg" style={{ backgroundImage: `linear-gradient(135deg, ${selectedCareer.color} 0%, #1e293b 100%)` }}>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                            <Calendar size={20} /> Cursado
-                        </h3>
-                        <div className="mb-4">
-                            <span className="text-xs uppercase opacity-70 block mb-1">Horarios</span>
-                            <p className="font-medium">{selectedCareer.detalle.horarios}</p>
+                    {item.tableData ? (
+                        <div className="overflow-x-auto mt-2 -mx-2 md:mx-0 rounded-lg border border-white/10">
+                            <table className="w-full text-sm text-left text-white/80">
+                                <thead className="text-xs uppercase bg-white/10 text-white font-bold">
+                                    <tr>
+                                        {item.tableData.headers.map((h, i) => (
+                                            <th key={i} className="px-4 py-3 whitespace-nowrap">{h}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {item.tableData.rows.map((row, rIndex) => (
+                                        <tr key={rIndex} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                            <td className="px-4 py-3 font-bold text-white/90 bg-white/5">{row[0]}</td>
+                                            {row.slice(1).map((cell, cIndex) => (
+                                                <td key={cIndex} className="px-4 py-3 border-l border-white/5">{cell}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                        <div>
-                            <span className="text-xs uppercase opacity-70 block mb-2">Modalidades</span>
-                            <ul className="space-y-2">
-                                {selectedCareer.detalle.modalidades.map((mod, i) => (
-                                    <li key={i} className="bg-white/10 p-2 rounded text-sm">
-                                        <strong className="block text-white">{mod.tipo}</strong>
-                                        <span className="text-white/80 text-xs">{mod.desc}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                    ) : (
+                        <div className={`text-white/80 leading-relaxed whitespace-pre-line ${isHovered ? 'text-white' : ''}`}>
+                            {item.contenido.split('**').map((part, i) => 
+                                i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+                            )}
                         </div>
-                    </div>
+                    )}
+                </div>
+            );
+        };
 
-                    {/* Requisitos */}
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800">
-                            <BookOpen size={20} className="text-slate-400"/> Requisitos
-                        </h3>
-                        <ul className="list-disc list-inside space-y-2 text-sm text-slate-600">
-                            {selectedCareer.detalle.requisitos.map((req, i) => (
-                                <li key={i}>{req}</li>
-                            ))}
-                        </ul>
-                    </div>
+        const SectionTitle = ({ children }) => (
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center drop-shadow-lg">
+                {children}
+                <div className="h-1 w-24 bg-blue-500 mx-auto mt-3 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>
+            </h2>
+        );
 
-                    {/* CTA Principal - DESCARGAR ARCHIVO */}
+        const Badge = ({ children, color }) => (
+            <span 
+                className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-sm"
+                style={{ backgroundColor: color || '#666' }}
+            >
+                {children}
+            </span>
+        );
+
+        const CareerModule = ({ career, onBack }) => {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [generatedMessage, setGeneratedMessage] = useState("");
+
+            const handleOpenModal = () => {
+                const diferencialesObj = career.mas_info.find(i => i.titulo.includes("Diferenciales"));
+                const diferencialesText = diferencialesObj 
+                    ? diferencialesObj.contenido.replace(/•/g, "✅").replace(/\*\*/g, "") 
+                    : "✅ Formación práctica y de calidad.";
+
+                const message = `
+Hola! 👋 Te paso la info de *${career.nombre}* en Cervantes:
+
+🎓 *Título Oficial:* ${career.titulo_final}
+${career.titulo_intermedio ? `📜 *Certificaciones:* \n${career.titulo_intermedio.replace(/•/g, "🔸")}` : ''}
+${career.extra_info_titulo ? `🚀 *Plus:* ${career.extra_info_titulo}` : ''}
+⏳ *Duración:* ${career.duracion}
+📍 *Modalidad:* ${career.modalidad}
+
+🌟 *¿Por qué elegir esta carrera?*
+${diferencialesText}
+
+¿Te gustaría que veamos el plan de estudios o tenés alguna duda puntual? 🤓
+                `.trim();
+
+                setGeneratedMessage(message);
+                setIsModalOpen(true);
+            };
+
+            return (
+                <div className="container mx-auto px-4 md:px-8 py-12 animate-in fade-in slide-in-from-top-10 duration-500">
+                    <MessageModal 
+                        isOpen={isModalOpen} 
+                        onClose={() => setIsModalOpen(false)} 
+                        message={generatedMessage}
+                        careerColor={career.color}
+                    />
+
                     <button 
-                        onClick={() => handleDownload(selectedCareer.nombre)}
-                        className="w-full py-4 rounded-xl font-bold text-white shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2"
-                        style={{ backgroundColor: selectedCareer.color }}
+                        onClick={onBack} 
+                        className="flex items-center gap-2 text-blue-300 hover:text-blue-100 transition-colors mb-8 text-lg font-medium"
                     >
-                        <Download size={20} /> DESCARGAR ARCHIVO
+                        <ArrowLeft size={20} /> Volver a Carreras
                     </button>
 
-                  </div>
+                    {/* Hero de la Carrera */}
+                    <div 
+                        className="relative p-8 md:p-12 rounded-3xl overflow-hidden mb-12 shadow-2xl animate-in fade-in zoom-in duration-500"
+                        style={{ background: `linear-gradient(135deg, ${career.color}44 0%, transparent 100%)`, border: '1px solid rgba(255,255,255,0.2)' }}
+                    >
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                            <Badge color={career.color + '99'}>{career.area}</Badge>
+                            {career.extra_info_titulo && (
+                                <span className="bg-white/10 text-yellow-300 px-3 py-1 rounded-full text-xs font-bold border border-yellow-300/30 animate-pulse flex items-center gap-2">
+                                    <Star size={14} fill="currentColor" /> {career.extra_info_titulo}
+                                </span>
+                            )}
+                        </div>
+                        
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-white mt-2 mb-3 leading-tight drop-shadow-md">
+                            {career.nombre}
+                        </h1>
+                        <p className="text-lg md:text-xl text-blue-100/90 max-w-3xl font-light leading-relaxed">
+                            {career.descripcion}
+                        </p>
+
+                        {/* Títulos Intermedios Destacados en el Hero */}
+                        {career.titulo_intermedio && (
+                            <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                <h3 className="text-sm uppercase tracking-wider text-white/50 font-bold mb-2 flex items-center gap-2">
+                                    <Award size={16} /> Títulos Intermedios & Certificaciones
+                                </h3>
+                                <p className="text-white/90 whitespace-pre-line font-medium leading-relaxed">
+                                    {career.titulo_intermedio}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Stats */}
+                        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                            <div className="bg-white/10 p-4 rounded-xl flex flex-col items-center justify-center border border-white/10">
+                                <Clock className="text-blue-300 mb-2" size={28} />
+                                <span className="text-2xl font-bold">{career.duracion}</span>
+                                <span className="text-xs text-gray-300 uppercase mt-1">Duración</span>
+                            </div>
+                            <div className="bg-white/10 p-4 rounded-xl flex flex-col items-center justify-center border border-white/10">
+                                <Users className="text-purple-300 mb-2" size={28} />
+                                <span className="text-lg font-bold text-center leading-tight py-1">{career.modalidad}</span>
+                                <span className="text-xs text-gray-300 uppercase mt-1">Modalidad</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Contenido Principal de la Carrera - UNA SOLA COLUMNA */}
+                    <div className="flex flex-col gap-8 mb-12">
+                        {/* Perfil del Egresado (Usando InfoCard para el efecto hover) */}
+                        <InfoCard 
+                            careerColor={career.color}
+                            item={{
+                                titulo: "Perfil del Egresado",
+                                contenido: career.perfil
+                            }}
+                        />
+
+                        {/* Contenidos Claves */}
+                        <div className="bg-black/20 border border-white/10 rounded-2xl p-6 shadow-lg overflow-hidden group hover:border-white/30 transition-all duration-300 hover:-translate-y-1"
+                             style={{ boxShadow: `0 10px 30px -10px ${career.color}22` }}>
+                            <h3 className="text-2xl font-bold mb-4 flex items-center gap-2 text-cyan-300">
+                                <BookOpen size={24} /> Contenidos Claves
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {career.materias_clave.map((m, i) => (
+                                    <div key={i} className="flex items-center gap-3 text-white/80 text-lg">
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: career.color }}></div>
+                                        {m}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Sección de Más Información / Otros Detalles */}
+                        <div className="flex flex-col gap-6">
+                            {career.mas_info && career.mas_info.map((item, index) => (
+                                <InfoCard key={index} item={item} careerColor={career.color} />
+                            ))}
+                        </div>
+
+                        {/* Botón de Armar Mensaje */}
+                        <button 
+                            onClick={handleOpenModal}
+                            className="w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-green-500/20 mt-4 flex items-center justify-center gap-3"
+                            style={{ backgroundColor: '#25D366' }}
+                        >
+                            <MessageCircle size={24} />
+                            Armar mensaje para WhatsApp
+                        </button>
+                    </div>
 
                 </div>
-              </div>
-            </div>
-          )}
+            );
+        };
 
-        </main>
-      </div>
-    </div>
-  );
-}
+        const App = () => {
+            const [activeCareerSlug, setActiveCareerSlug] = useState(null);
+
+            const navigateToCareer = (slug) => {
+                setActiveCareerSlug(slug);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const goBack = () => {
+                setActiveCareerSlug(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const selectedCareer = CARRERAS.find(c => c.slug === activeCareerSlug);
+
+            return (
+                <div className="min-h-screen font-sans text-slate-100 selection:bg-blue-500 selection:text-white overflow-x-hidden relative">
+                    {/* FONDO FIJO */}
+                    <div 
+                        className="fixed inset-0 z-0"
+                        style={{
+                            backgroundImage: 'url("https://i.postimg.cc/6wfDzyN9/image.png")',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundAttachment: 'fixed',
+                        }}
+                    >
+                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
+                    </div>
+
+                    {/* CONTENIDO SCROLLABLE */}
+                    <div className="relative z-10 pb-20">
+                        
+                        {!selectedCareer ? (
+                            <React.Fragment>
+                                {/* HEADER */}
+                                <header className="pt-20 pb-12 px-4 text-center">
+                                    <div className="inline-block p-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-6 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                                        <img src="https://i.ibb.co/4nqvFQGM/logo.png" alt="Logo Cervantes" className="h-16 w-auto object-contain" />
+                                    </div>
+                                    <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 drop-shadow-md tracking-tight mb-4">
+                                        Cervantes
+                                    </h1>
+                                    <p className="text-xl md:text-2xl text-blue-100/80 max-w-2xl mx-auto font-light leading-relaxed">
+                                        Formando profesionales con pasión y excelencia.
+                                        <br/>
+                                        <span className="text-sm font-medium uppercase tracking-[0.2em] opacity-70 mt-2 block">Oferta Académica 2025</span>
+                                    </p>
+                                </header>
+
+                                {/* GRID */}
+                                <main className="container mx-auto px-4 md:px-8">
+                                    <SectionTitle>Nuestras Carreras</SectionTitle>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+                                        {CARRERAS.map((carrera) => (
+                                            <GlassCard 
+                                                key={carrera.id} 
+                                                hoverColor={carrera.color}
+                                                onClick={() => navigateToCareer(carrera.slug)}
+                                                className="min-h-[280px] flex flex-col justify-between group"
+                                            >
+                                                <div>
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <Badge color={carrera.color + '99'}>{carrera.area}</Badge>
+                                                        <ChevronRight className="opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all" />
+                                                    </div>
+                                                    <h3 className="text-2xl font-bold mb-3 leading-tight">{carrera.nombre}</h3>
+                                                    <p className="text-sm opacity-80 mb-4 font-light leading-relaxed">
+                                                        {carrera.descripcion}
+                                                    </p>
+                                                </div>
+                                                
+                                                <div className="flex flex-col gap-2 text-sm font-medium opacity-90 pt-4 border-t border-white/20 mt-auto">
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock size={16} /> {carrera.duracion}
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Users size={16} /> <span className="text-xs">{carrera.modalidad}</span>
+                                                    </div>
+                                                </div>
+                                            </GlassCard>
+                                        ))}
+                                    </div>
+
+                                    {/* CUADRO COMPARATIVO (SÓLO TABLA, SIN GRÁFICO) */}
+                                    <div className="max-w-4xl mx-auto mb-20">
+                                        <div className="bg-black/20 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl overflow-hidden">
+                                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                                                <BarChart3 className="text-purple-400" /> Resumen Comparativo
+                                            </h3>
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b border-white/20 text-white/60 text-sm uppercase tracking-wider">
+                                                            <th className="pb-3 font-medium">Carrera</th>
+                                                            <th className="pb-3 font-medium text-center">Duración</th>
+                                                            <th className="pb-3 font-medium text-center">Modalidad</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="text-sm font-light">
+                                                        {CARRERAS.map((c, i) => (
+                                                            <tr key={i} className="group hover:bg-white/5 transition-colors">
+                                                                <td className="py-4 font-medium text-white group-hover:text-blue-300 transition-colors">
+                                                                    {c.nombre}
+                                                                </td>
+                                                                <td className="py-4 text-center opacity-80 text-xs">
+                                                                    {c.duracion}
+                                                                </td>
+                                                                <td className="py-4 text-center opacity-80 text-xs">
+                                                                    {c.modalidad}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* FOOTER EXTRA */}
+                                    <div className="rounded-3xl p-8 md:p-12 bg-gradient-to-br from-blue-900/40 to-slate-900/40 border border-white/10 backdrop-blur-md text-center mb-20">
+                                        <Award size={48} className="mx-auto text-yellow-400 mb-6" />
+                                        <h3 className="text-3xl font-bold mb-4">¿Por qué elegir Cervantes?</h3>
+                                        <p className="max-w-3xl mx-auto text-lg text-blue-100/80 mb-8">
+                                            Más de 60 años de trayectoria formando profesionales. Contamos con convenios universitarios para que puedas continuar tu licenciatura y una bolsa de trabajo activa.
+                                        </p>
+                                        <button className="px-8 py-3 bg-white text-slate-900 font-bold rounded-full hover:bg-blue-50 transition-transform hover:scale-105 shadow-lg shadow-white/20">
+                                            Solicitar Más Información
+                                        </button>
+                                    </div>
+                                </main>
+                            </React.Fragment>
+                        ) : (
+                            <CareerModule career={selectedCareer} onBack={goBack} />
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
