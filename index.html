@@ -88,6 +88,16 @@ const carreras=[
  hacer:['Realizar operaciones de alquiler, compra y venta','Atender clientes y promocionar propiedades','Efectuar tasaciones y cotizaciones','Administrar consorcios, condominios y PH','Gestionar mantenimiento, impuestos, servicios, expensas y cobranzas','Diseñar acciones de marketing y ventas','Trabajar con fideicomisos','Asistir en proyectos y desarrollos inmobiliarios'],
  continuidad:['Martillero, Corredor Público y Corredor Inmobiliario · Universidad Siglo 21','Licenciatura en Emprendimientos · Universidad Siglo 21','Licenciatura en Corretaje Inmobiliario · Universidad FASTA'],
  plan:[['1° · 1er semestre',['Adaptación a los Estudios en el Nivel Superior','Estructura y Gestión de las Organizaciones','Gestiones Administrativas','Herramientas Informáticas para la Gestión','Introducción al Derecho']],['1° · 2do semestre',['Derecho Privado I','Elementos de Matemática y Estadística','Gestiones Inmobiliarias','Práctica Profesionalizante I','Sociología de la Empresa']],['2° · 3er semestre',['Cotización y Tasación I','Derecho Privado II','Elementos de Economía y Finanzas','Marketing Inmobiliario','Práctica Profesionalizante II']],['2° · 4to semestre',['Cotización y Tasación II','Ética Profesional','Negocios Inmobiliarios','Práctica Profesionalizante III']],['3° · 5to semestre',['Corretaje Inmobiliario','Relaciones Públicas y Oratoria','Seminario de Actualización en Negocios Inmobiliarios']]]
+},
+{
+ slug:'logistica',nombre:'Logística',area:'LOGÍSTICA',color:'#19afd0',duracion:'2½ años',modalidad:'Consultar modalidad vigente',titulo:'Técnico Superior en Logística',certificaciones:[],url:'',
+ presentacion:'Los sistemas logísticos son muy importantes para el correcto funcionamiento de una empresa. Al ser parte de la cadena de suministro, su estructura es compleja y todos los procesos internos y externos están relacionados entre sí.',
+ aprender:'El/La Técnico Superior en Logística estará capacitado para planificar, coordinar y controlar los recursos necesarios para llevar adelante las funciones propias de la logística de negocios, atendiendo a los desafíos, necesidades y problemáticas del contexto económico y social en el que actúe.',
+ donde:[],
+ hacer:['Organizar y gestionar la recepción, el almacenamiento, el despacho y la distribución de diversos insumos, bienes y servicios.','Coordinar y gestionar el transporte.','Diseñar y dirigir procesos de relaciones logísticas entre proveedores, empresas, clientes y consumidores finales.','Definir y evaluar procesos Logísticos Integrales de alcance regional, nacional e internacional.','Generar propuestas innovadoras y/o emprendimientos productivos propios del ámbito de la logística.'],
+ continuidad:[],
+ requisitos:['Haber finalizado el secundario o contar con el certificado de título en trámite.','Tener acceso a internet a través de una computadora de escritorio o portátil.'],
+ plan:[['1° año · 1° cuatrimestre',['Entorno Administrativo','Inglés Técnico I','Contabilidad General','Logística de Negocios','Herramientas Tecnológicas']],['1° año · 2° cuatrimestre',['Administración de las Operaciones','Inglés Técnico II','Contabilidad de Costos','Matemática Aplicada','Logística y cadena de abastecimiento']],['2° año · 1° cuatrimestre',['Logística y proceso productivo','Estadística Aplicada','Innovación en la Gestión Logística','Proceso comercial','Logística, Transporte y distribución']],['2° año · 2° cuatrimestre',['Comercio internacional','Logística y calidad','Transformación digital y Logística','Metodologías Lean e industrias 4.0','Práctica Profesionalizante I']],['3° año · 1° cuatrimestre',['Logística, digitalización y medio ambiente','Sistemas de Información Logística','Tecnologías al servicio del e-commerce','Optimización de los procesos logísticos','Práctica Profesionalizante II']]]
 }
 ];
 function el(html){return html}
@@ -99,7 +109,7 @@ function home(){
     <img src="https://i.ibb.co/4nqvFQGM/logo.png" class="h-16 mx-auto mb-5" alt="Cervantes">
     <p class="uppercase tracking-[.28em] text-blue-200/70 text-xs font-bold">Guía Comercial Actualizada</p>
     <h1 class="text-4xl md:text-6xl font-black mt-3">Información completa de carreras</h1>
-    <p class="text-blue-100/75 mt-4 max-w-3xl mx-auto">Contenido integrado desde las landings oficiales de Cervantes: perfil, campo laboral, competencias, plan de estudios, requisitos y continuidad universitaria.</p>
+    <p class="text-blue-100/75 mt-4 max-w-3xl mx-auto">Contenido integrado desde las landings oficiales de Cervantes y material académico vigente: perfil, campo laboral, competencias, plan de estudios, requisitos y continuidad universitaria.</p>
     <div class="inline-flex mt-5 px-4 py-2 rounded-full pill text-sm">📅 Próximos inicios informados: <b class="ml-1">Marzo · Abril 2027</b></div>
    </header>
    <section class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">${carreras.map(c=>`<button onclick="location.hash='${c.slug}'" class="card glass rounded-3xl p-6 text-left min-h-[260px]" style="box-shadow:0 22px 55px -35px ${c.color}">
@@ -112,6 +122,8 @@ function home(){
 }
 function career(c){
  document.title=`${c.nombre} · Cervantes`;
+ const requisitos=c.requisitos||REQUISITOS;
+ const requisitosCustom=Array.isArray(c.requisitos);
  return `<main class="max-w-6xl mx-auto px-4 py-10">
   <button onclick="location.hash=''" class="mb-6 text-blue-200 hover:text-white">← Volver a carreras</button>
   <section class="glass rounded-3xl p-7 md:p-10 mb-8" style="background:linear-gradient(135deg,${c.color}33,rgba(15,23,42,.82))">
@@ -122,16 +134,17 @@ function career(c){
    ${c.certificaciones.length?`<div class="mt-4 pill rounded-2xl p-4"><div class="text-xs text-slate-400 mb-2">CERTIFICACIONES / ARTICULACIÓN</div>${list(c.certificaciones,'★')}</div>`:''}
   </section>
   <section class="grid md:grid-cols-2 gap-6 mb-8">
-   <article class="glass rounded-3xl p-6"><h2 class="text-2xl font-black mb-4">💼 ¿Dónde podrás trabajar?</h2>${list(c.donde)}</article>
-   <article class="glass rounded-3xl p-6"><h2 class="text-2xl font-black mb-4">🧠 ¿Qué sabrás hacer?</h2>${list(c.hacer)}</article>
+   ${c.aprender?`<article class="glass rounded-3xl p-6"><h2 class="text-2xl font-black mb-4">📦 ¿Qué voy a aprender?</h2><p class="text-slate-200 leading-relaxed">${c.aprender}</p></article>`:''}
+   ${c.donde&&c.donde.length?`<article class="glass rounded-3xl p-6"><h2 class="text-2xl font-black mb-4">💼 ¿Dónde podrás trabajar?</h2>${list(c.donde)}</article>`:''}
+   <article class="glass rounded-3xl p-6"><h2 class="text-2xl font-black mb-4">🧠 ¿Qué ${c.aprender?'podré':'sabrás'} hacer?</h2>${list(c.hacer)}</article>
   </section>
   ${c.continuidad.length?`<section class="glass rounded-3xl p-6 mb-8"><h2 class="text-2xl font-black mb-4">🎓 Continuidad universitaria</h2><div class="grid md:grid-cols-2 gap-3">${c.continuidad.map(x=>`<div class="pill rounded-xl p-4">${x}</div>`).join('')}</div></section>`:''}
   <section class="glass rounded-3xl p-6 mb-8"><h2 class="text-2xl font-black mb-5">📚 Plan de estudios completo</h2><div class="grid md:grid-cols-2 gap-4">${c.plan.map(([sem,mats])=>`<div class="pill rounded-2xl p-5"><h3 class="font-black mb-3" style="color:${c.color}">${sem}</h3>${list(mats,'•')}</div>`).join('')}</div></section>
-  <section class="glass rounded-3xl p-6 mb-8"><h2 class="text-2xl font-black mb-4">📄 Requisitos de ingreso</h2><p class="text-slate-300 mb-4">La web oficial informa que, luego del inicio de clases, el estudiante dispone de hasta 10 días para subir la documentación en Autogestión Alumno.</p>${list(REQUISITOS,'✓')}<p class="text-sm text-slate-400 mt-4">La documentación y condiciones pueden actualizarse. Conviene verificar siempre la landing oficial antes de confirmar un caso particular.</p></section>
-  <div class="flex flex-col sm:flex-row gap-3 pb-12"><a href="${c.url}" target="_blank" rel="noopener" class="flex-1 text-center rounded-2xl px-5 py-4 font-black" style="background:${c.color}">🌐 Ver landing oficial de ${c.nombre}</a><button onclick="copyInfo('${c.slug}')" class="flex-1 pill rounded-2xl px-5 py-4 font-black">📋 Copiar resumen comercial</button></div>
+  <section class="glass rounded-3xl p-6 mb-8"><h2 class="text-2xl font-black mb-4">📄 ${requisitosCustom?'¿Qué necesito para cursar?':'Requisitos de ingreso'}</h2>${requisitosCustom?'':`<p class="text-slate-300 mb-4">La web oficial informa que, luego del inicio de clases, el estudiante dispone de hasta 10 días para subir la documentación en Autogestión Alumno.</p>`}${list(requisitos,'✓')}${requisitosCustom?'':`<p class="text-sm text-slate-400 mt-4">La documentación y condiciones pueden actualizarse. Conviene verificar siempre la landing oficial antes de confirmar un caso particular.</p>`}</section>
+  <div class="flex flex-col sm:flex-row gap-3 pb-12">${c.url?`<a href="${c.url}" target="_blank" rel="noopener" class="flex-1 text-center rounded-2xl px-5 py-4 font-black" style="background:${c.color}">🌐 Ver landing oficial de ${c.nombre}</a>`:''}<button onclick="copyInfo('${c.slug}')" class="flex-1 pill rounded-2xl px-5 py-4 font-black">📋 Copiar resumen comercial</button></div>
  </main>`
 }
-function copyInfo(slug){const c=carreras.find(x=>x.slug===slug);const cert=c.certificaciones.length?`\n📜 ${c.certificaciones.join(' · ')}`:'';const txt=`🎓 ${c.nombre}\nTítulo: ${c.titulo}\n⏳ Duración: ${c.duracion}\n💻 Modalidad: ${c.modalidad}${cert}\n\n💼 Salida laboral:\n• ${c.donde.slice(0,4).join('\n• ')}\n\n📅 Próximos inicios informados: Marzo - Abril 2027`;navigator.clipboard.writeText(txt).then(()=>alert('Resumen copiado ✅'))}
+function copyInfo(slug){const c=carreras.find(x=>x.slug===slug);const cert=c.certificaciones.length?`\n📜 ${c.certificaciones.join(' · ')}`:'';const detalle=c.donde&&c.donde.length?`\n\n💼 Salida laboral:\n• ${c.donde.slice(0,4).join('\n• ')}`:`\n\n🧠 Podrás:\n• ${c.hacer.slice(0,4).join('\n• ')}`;const txt=`🎓 ${c.nombre}\nTítulo: ${c.titulo}\n⏳ Duración: ${c.duracion}\n💻 Modalidad: ${c.modalidad}${cert}${detalle}\n\n📅 Próximos inicios informados: Marzo - Abril 2027`;navigator.clipboard.writeText(txt).then(()=>alert('Resumen copiado ✅'))}
 function render(){const slug=location.hash.replace('#','');const c=carreras.find(x=>x.slug===slug);document.getElementById('app').innerHTML=c?career(c):home();window.scrollTo(0,0)}
 window.addEventListener('hashchange',render);render();
 </script>
