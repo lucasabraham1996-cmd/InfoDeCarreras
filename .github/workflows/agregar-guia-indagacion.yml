@@ -1,0 +1,70 @@
+name: Agregar guía de indagación por carrera
+
+on:
+  push:
+    paths:
+      - '.github/workflows/agregar-guia-indagacion.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Incorporar guía de indagación
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('index.html')
+          s = path.read_text(encoding='utf-8')
+
+          discovery = r'''const DISCOVERY={
+          'analista-de-sistemas':{objetivo:'Detectar si la persona busca una formación tecnológica amplia, con interés por comprender problemas, diseñar soluciones y no limitarse solamente a programar.',preguntas:['¿Qué parte de la tecnología te atrae más: programar, entender cómo funcionan los sistemas, resolver problemas o un poco de todo?','¿Tuviste contacto previo con programación, soporte, redes, bases de datos o herramientas informáticas?','Cuando pensás en trabajar en tecnología, ¿te imaginás desarrollando, analizando necesidades o coordinando soluciones?','¿Qué te genera más dudas hoy: programación, matemática, duración, modalidad o salida laboral?','¿Buscás insertarte rápido o construir un perfil más integral para crecer dentro del área?','¿Qué diferencia esperás encontrar entre una carrera como esta y un curso corto?'],escuchar:['Interés por lógica y resolución de problemas','Experiencia tecnológica previa','Preferencia por desarrollo o análisis','Necesidad de certificaciones progresivas','Temores frente a programación o matemática']},
+          'desarrollo-web':{objetivo:'Comprender si la persona disfruta crear productos digitales, cuánto conoce del desarrollo y si busca una salida laboral práctica, freelance o remota.',preguntas:['¿Alguna vez hiciste una página web, programaste o probaste alguna herramienta de desarrollo?','¿Te atrae más crear cosas visibles y funcionales o analizar sistemas más amplios?','¿Qué te gustaría poder construir por tu cuenta al avanzar en la carrera?','¿Te interesa trabajar en una empresa, de forma freelance, remoto o todavía no lo definiste?','¿Qué conocés hoy de HTML, CSS, JavaScript, aplicaciones o bases de datos?','¿Qué esperás que una carrera te aporte que no te daría un curso corto o tutoriales?'],escuchar:['Gusto por crear y experimentar','Conocimientos previos de programación','Interés por portfolio y proyectos','Búsqueda de trabajo remoto o independiente','Necesidad de estructura y título oficial']},
+          'ciencia-de-datos-ia':{objetivo:'Explorar el vínculo de la persona con los datos, la lógica y la tecnología, y distinguir interés real por análisis e IA de una expectativa solamente asociada a una tendencia.',preguntas:['¿Qué es lo que más te llama la atención de Ciencia de Datos o Inteligencia Artificial?','¿Disfrutás trabajar con números, patrones, información y búsqueda de explicaciones?','¿Tuviste alguna experiencia con Excel, programación, estadísticas, bases de datos o herramientas de IA?','¿Te interesa más crear modelos, analizar información o aplicar datos para tomar decisiones?','¿Cómo te llevás con matemática y lógica? ¿Es algo que te gusta, te cuesta o simplemente no lo exploraste mucho?','¿En qué tipo de problemas o sectores te gustaría aplicar IA o análisis de datos?'],escuchar:['Curiosidad analítica','Relación con matemática y lógica','Uso previo de datos o IA','Expectativas realistas sobre la carrera','Interés por decisiones, automatización o modelos']},
+          'recursos-humanos':{objetivo:'Identificar si el interés está puesto solamente en selección o en la gestión integral de personas, y conocer experiencias previas de trabajo en equipo y organización.',preguntas:['¿Qué es lo primero que se te viene a la cabeza cuando pensás en Recursos Humanos?','¿Te interesa más selección, capacitación, clima, administración de personal, sueldos o todavía no sabés?','¿Tuviste experiencias coordinando personas, trabajando en equipos o resolviendo situaciones entre compañeros?','¿Qué te gusta más: acompañar personas, organizar procesos o combinar ambas cosas?','¿Te imaginás trabajando dentro de una empresa, en consultoría o ayudando a distintas organizaciones?','¿Qué situación laboral o de personas te gustaría aprender a gestionar mejor?'],escuchar:['Capacidad de escucha y vínculo','Interés por gestión, no solo selección','Experiencias con equipos','Afinidad con legislación y procesos','Interés por consultoría o desarrollo organizacional']},
+          'marketing':{objetivo:'Descubrir qué entiende la persona por marketing, su vínculo con ventas y negocios, y si busca estrategia integral o solamente herramientas de redes sociales.',preguntas:['¿Qué entendés hoy por marketing?','¿Te interesa más crear campañas, entender al consumidor, vender, investigar mercados o desarrollar marcas?','¿Tenés un emprendimiento, trabajás en un área comercial o alguna vez gestionaste redes o ventas?','¿Qué te gustaría aprender a hacer que hoy todavía no sabés hacer?','¿Te atrae más la parte creativa, la analítica o la combinación de ambas?','Si mañana te dieran un negocio para hacer crecer, ¿qué sería lo primero que querrías aprender a analizar?'],escuchar:['Visión de marketing más allá de redes','Experiencia comercial o emprendedora','Interés por estrategia y consumidor','Equilibrio creativo-analítico','Objetivos de consultoría, ventas o marca']},
+          'administracion-de-empresas':{objetivo:'Conocer el vínculo de la persona con empresas, Pymes o emprendimientos y detectar qué áreas de gestión necesita comprender o fortalecer.',preguntas:['¿Hoy trabajás en una empresa, tenés un emprendimiento o participás de un negocio familiar?','¿Qué área de una empresa te interesa entender mejor: finanzas, personas, ventas, procesos, producción o todas?','¿Te gusta organizar, planificar y tomar decisiones o preferís especializarte en un área puntual?','¿Qué problema de gestión te gustaría saber resolver dentro de una organización?','¿Tu objetivo es crecer en tu trabajo, administrar tu propio negocio o todavía estás explorando opciones?','¿Qué conocimientos sentís que te faltan hoy para poder gestionar con más seguridad?'],escuchar:['Experiencia en organizaciones o negocios','Interés por visión integral','Necesidad de profesionalizar una Pyme','Objetivos de crecimiento laboral','Áreas de gestión que generan mayor interés']},
+          'higiene-y-seguridad':{objetivo:'Evaluar el interés genuino por la prevención, el trabajo con normas y riesgos, y conocer si la persona se imagina en ámbitos operativos, industriales o de asesoramiento.',preguntas:['¿Qué te atrajo de Higiene y Seguridad?','¿Tuviste contacto con obras, industrias, comercios, salud ocupacional o algún entorno donde se trabajen riesgos?','¿Te ves recorriendo lugares de trabajo, detectando riesgos y proponiendo mejoras?','¿Qué te interesa más: prevención, legislación, ambiente, investigación de accidentes o capacitación?','¿Cómo te sentís con materias técnicas como física, química, ergonomía o medicina laboral?','¿Te gustaría trabajar dentro de una organización o brindar asesoramiento a distintas empresas?'],escuchar:['Orientación preventiva','Comodidad con trabajo de campo','Interés por normativa y análisis','Experiencia en entornos productivos','Preferencia por empleo interno o asesoría']},
+          'gestion-inmobiliaria':{objetivo:'Indagar la relación de la persona con el mercado inmobiliario, su perfil comercial y cuánto le interesan la administración, la tasación y el desarrollo de negocios.',preguntas:['¿Qué te atrae del mundo inmobiliario?','¿Tuviste experiencia vendiendo, alquilando, administrando propiedades o trabajando con clientes?','¿Te interesa más la parte comercial, la administración, la tasación o los negocios inmobiliarios?','¿Te gustaría trabajar en una inmobiliaria o pensás en desarrollar algo propio a futuro?','¿Qué conocés hoy sobre contratos, tasaciones, consorcios o fideicomisos?','¿Tu objetivo es insertarte rápido en el rubro o también continuar luego con una articulación o carrera universitaria?'],escuchar:['Perfil comercial y negociación','Experiencia con clientes o propiedades','Interés por independencia laboral','Afinidad con administración y derecho','Interés por articulaciones futuras']},
+          'logistica':{objetivo:'Detectar si la persona entiende la logística como un sistema integral y conocer su experiencia con operaciones, stock, transporte, abastecimiento o comercio.',preguntas:['¿Qué entendés hoy por logística?','¿Tuviste contacto con depósitos, stock, transporte, compras, distribución, e-commerce o producción?','¿Qué parte te interesa más: abastecimiento, almacenamiento, transporte, distribución, tecnología o mejora de procesos?','¿Te gusta organizar operaciones y buscar formas de hacerlas más eficientes?','¿Te imaginás trabajando coordinando proveedores, empresas, clientes y transportistas?','¿Qué te gustaría aprender a mejorar de una operación o cadena de abastecimiento?'],escuchar:['Visión integral de la cadena','Experiencia operativa previa','Interés por procesos y eficiencia','Afinidad con tecnología aplicada','Interés por transporte, e-commerce o comercio internacional']}
+          };'''
+
+          if 'const DISCOVERY=' not in s:
+              s = s.replace('const FAQ_EXTRA=', discovery + '\nconst FAQ_EXTRA=', 1)
+
+          fn = r'''function discoveryCard(c){const d=DISCOVERY[c.slug];if(!d)return '';const pasos=[['1','Abrir sin vender','Preguntá qué le llamó la atención de la carrera y dejá que explique con sus palabras.'],['2','Explorar conocimientos','Detectá qué sabe, qué experiencias tuvo y qué conceptos ya conoce del área.'],['3','Entender el objetivo','Indagá qué quiere lograr: trabajar, cambiar de rubro, crecer, emprender o continuar estudios.'],['4','Detectar dudas y barreras','Preguntá por miedos, materias, modalidad, tiempos, expectativas y cualquier freno que aparezca.'],['5','Devolver y conectar','Resumí lo que escuchaste y vinculá solo 2 o 3 aspectos de la carrera con lo que la persona dijo.']];return `<section id="indagacion" class="glass rounded-[28px] p-6 md:p-8 mb-7" style="--accent:${c.color}"><div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6"><div><div class="section-title"><span class="ico">🔎</span><span>Guía de indagación</span></div><p class="text-slate-400 mt-2 max-w-3xl">Preguntas y pasos para conocer mejor a la persona antes de recomendar o argumentar la carrera.</p></div><button onclick="copyDiscovery('${c.slug}')" class="quiz-btn soft rounded-2xl px-4 py-3 font-bold">📋 Copiar preguntas</button></div><div class="soft rounded-2xl p-5 mb-5 border-l-4" style="border-left-color:${c.color}"><div class="eyebrow mb-2">Qué buscamos descubrir</div><p class="text-slate-200 leading-relaxed">${esc(d.objetivo)}</p></div><div class="grid xl:grid-cols-[.9fr_1.1fr] gap-5"><div><h3 class="font-black text-lg mb-3">Pasos sugeridos</h3><div class="space-y-3">${pasos.map(([n,t,x])=>`<div class="soft rounded-2xl p-4 flex gap-3"><span class="w-9 h-9 shrink-0 rounded-xl grid place-items-center font-black text-white" style="background:${c.color}">${n}</span><div><div class="font-black">${t}</div><div class="text-slate-400 text-sm mt-1 leading-relaxed">${x}</div></div></div>`).join('')}</div></div><div><h3 class="font-black text-lg mb-3">Preguntas para indagar</h3><div class="space-y-3">${d.preguntas.map((q,i)=>`<div class="soft rounded-2xl p-4 flex gap-3"><span class="w-8 h-8 shrink-0 rounded-xl grid place-items-center font-black text-white" style="background:${c.color}">${i+1}</span><p class="text-slate-200 leading-relaxed">${esc(q)}</p></div>`).join('')}</div></div></div><div class="mt-5"><h3 class="font-black text-lg mb-3">Qué escuchar en las respuestas</h3><div class="flex flex-wrap gap-2">${d.escuchar.map(x=>`<span class="soft rounded-full px-3 py-2 text-sm text-slate-200">👂 ${esc(x)}</span>`).join('')}</div></div></section>`;}'''
+
+          if 'function discoveryCard(c)' not in s:
+              s = s.replace('function comercialCard(c){', fn + '\nfunction comercialCard(c){', 1)
+
+          old_nav = '<button class="navchip rounded-xl px-3 py-2" onclick="goSection(\'claves\')">🎯 Claves</button><button class="navchip rounded-xl px-3 py-2" onclick="goSection(\'perfil\')">💼 Perfil</button>'
+          new_nav = '<button class="navchip rounded-xl px-3 py-2" onclick="goSection(\'claves\')">🎯 Claves</button><button class="navchip rounded-xl px-3 py-2" onclick="goSection(\'indagacion\')">🔎 Indagación</button><button class="navchip rounded-xl px-3 py-2" onclick="goSection(\'perfil\')">💼 Perfil</button>'
+          if old_nav in s and 'goSection(\'indagacion\')' not in s:
+              s = s.replace(old_nav, new_nav, 1)
+
+          if '${comercialCard(c)}<section id="perfil"' in s and '${discoveryCard(c)}' not in s:
+              s = s.replace('${comercialCard(c)}<section id="perfil"', '${comercialCard(c)}${discoveryCard(c)}<section id="perfil"', 1)
+
+          copy_fn = r'''function copyDiscovery(slug){const c=carreras.find(x=>x.slug===slug),d=DISCOVERY[slug];if(!d)return;const txt=`🔎 Guía de indagación · ${c.nombre}\n\n🎯 Objetivo:\n${d.objetivo}\n\n💬 Preguntas sugeridas:\n${d.preguntas.map((q,i)=>`${i+1}. ${q}`).join('\n')}\n\n👂 Qué escuchar:\n• ${d.escuchar.join('\n• ')}`;navigator.clipboard.writeText(txt).then(()=>showToast('Preguntas copiadas ✅'));}'''
+          if 'function copyDiscovery(slug)' not in s:
+              s = s.replace('function goSection(id){', copy_fn + 'function goSection(id){', 1)
+
+          path.write_text(s, encoding='utf-8')
+
+      - name: Commit y push
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No hay cambios pendientes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Agregar guía de indagación comercial por carrera"
+          git push
