@@ -1,0 +1,46 @@
+name: Corregir continuidades y títulos oficiales
+
+on:
+  push:
+    paths:
+      - '.github/workflows/corregir-continuidades.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Corregir datos auditados
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          replacements={
+            "continuidad:['Licenciatura en Tecnologías Educativas · UTN']": "continuidad:['Licenciatura en Tecnologías Educativas · UTN','Licenciatura en Tecnología de la Información · Universidad de Palermo','Licenciatura en Comercio Electrónico · UTN']",
+            "continuidad:['Licenciatura en Gestión del Talento Humano · Universidad FASTA','Licenciatura en Administración · Universidad de Congreso']": "continuidad:['Licenciatura en Gestión del Talento Humano · Universidad FASTA','Licenciatura en Administración · Universidad de Congreso','Licenciatura en Gestión Pública · Universidad Católica de Córdoba','Licenciatura en Recursos Humanos · Universidad de Morón','Licenciatura en Gestión de Recursos Humanos · Universidad de Congreso']",
+            "continuidad:['Licenciatura en Administración · Universidad de Morón','Licenciatura en Gestión Pública · Universidad Católica de Córdoba','Licenciatura en Administración de Empresas · Universidad FASTA','Licenciatura en Administración · Universidad de Congreso','Licenciatura en Comercio Electrónico · UTN']": "continuidad:['Licenciatura en Administración · Universidad de Morón','Licenciatura en Gestión Pública · Universidad Católica de Córdoba','Licenciatura en Administración de Empresas · Universidad FASTA','Licenciatura en Administración · Universidad de Congreso','Licenciatura en Comercio Electrónico · UTN','Licenciatura en Gestión de Recursos Humanos · Universidad de Congreso']",
+            "certificaciones:['2º año: Diplomado en Administración Inmobiliaria','Articulación: Martillero y Corredor Público']": "certificaciones:['2º año: Diplomado en Administración Inmobiliaria','Título por articulación universitaria: Martillero y Corredor Público']",
+            "La ficha incluye continuidad en Gestión del Talento Humano en Universidad FASTA y Administración en Universidad de Congreso.": "Sí. La landing oficial informa cinco continuidades: Gestión del Talento Humano (FASTA), Administración (Universidad de Congreso), Gestión Pública (UCC), Recursos Humanos (Universidad de Morón) y Gestión de Recursos Humanos (Universidad de Congreso)."
+          }
+          for old,new in replacements.items():
+              if old in s:
+                  s=s.replace(old,new,1)
+              else:
+                  print('No encontrado:',old[:90])
+          p.write_text(s,encoding='utf-8')
+      - name: Commit y push
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No hay cambios"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Corregir continuidades universitarias y articulaciones"
+          git push
